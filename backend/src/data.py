@@ -34,18 +34,25 @@ def get_career_stats(player_id):
 
     return df[['SEASON_ID', 'GP', 'PTS', 'AST', 'REB', 'MIN']]
 
+_CAREER_CACHE = {}
+
 def get_career_totals(player_id):
+    if player_id in _CAREER_CACHE:
+        return _CAREER_CACHE[player_id].copy()
+
     Player = playercareerstats.PlayerCareerStats(player_id=player_id)
     df = Player.get_data_frames()[0]
     df_cleaned = df.groupby('SEASON_ID', group_keys=False).apply(
         lambda g: g[g['TEAM_ABBREVIATION'] == 'TOT'] if 'TOT' in g['TEAM_ABBREVIATION'].values else g
     )
-    return pd.DataFrame([{
+    res = pd.DataFrame([{
         "GP": df_cleaned["GP"].sum(),
         "PTS": df_cleaned["PTS"].sum(),
         "AST": df_cleaned["AST"].sum(),
         "REB": df_cleaned["REB"].sum()
     }])
+    _CAREER_CACHE[player_id] = res
+    return res.copy()
 
 def search_players(query: str, limit: int = 10):
     if not query or not query.strip():
