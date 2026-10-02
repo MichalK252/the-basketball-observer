@@ -49,7 +49,11 @@ def get_career_totals(player_id):
         "GP": df_cleaned["GP"].sum(),
         "PTS": df_cleaned["PTS"].sum(),
         "AST": df_cleaned["AST"].sum(),
-        "REB": df_cleaned["REB"].sum()
+        "REB": df_cleaned["REB"].sum(),
+        "STL": df_cleaned["STL"].sum(),
+        "BLK": df_cleaned["BLK"].sum(),
+        "FGM": df_cleaned["FGM"].sum(),
+        "FGA": df_cleaned["FGA"].sum()
     }])
     _CAREER_CACHE[player_id] = res
     return res.copy()

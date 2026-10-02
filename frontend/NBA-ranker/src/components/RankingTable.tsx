@@ -41,11 +41,14 @@ export function RankingTable({ players, loading, error }: RankingTableProps) {
                 <tr className="border-b-2 border-border-strong font-mono text-[11px] text-ink-secondary tracking-wider uppercase">
                   <th className="text-left py-2 px-2.5 w-10">Pos.</th>
                   <th className="text-left py-2 px-2.5">Player & Moniker</th>
-                  <th className="text-right py-2 px-2.5">GP</th>
-                  <th className="text-right py-2 px-2.5">PPG</th>
-                  <th className="text-right py-2 px-2.5">APG</th>
-                  <th className="text-right py-2 px-2.5">RPG</th>
-                  <th className="text-right py-2 px-2.5 font-bold">Impact Rating</th>
+                  <th className="text-right py-2 px-1.5">GP</th>
+                  <th className="text-right py-2 px-1.5">PPG</th>
+                  <th className="text-right py-2 px-1.5">APG</th>
+                  <th className="text-right py-2 px-1.5">RPG</th>
+                  <th className="text-right py-2 px-1.5">SPG</th>
+                  <th className="text-right py-2 px-1.5">BPG</th>
+                  <th className="text-right py-2 px-1.5">FG%</th>
+                  <th className="text-right py-2 px-2 font-bold">Impact Rating</th>
                 </tr>
               </thead>
               <tbody>
@@ -70,28 +73,37 @@ export function RankingTable({ players, loading, error }: RankingTableProps) {
                         <div className="font-serif text-base font-semibold text-ink">
                           {p.Player}
                         </div>
-                        <div className="font-mono text-[11px] text-ink-muted mt-0.5">
-                          {p.PTS.toLocaleString()} PTS · {p.AST.toLocaleString()} AST · {p.REB.toLocaleString()} REB
+                        <div className="font-mono text-[10px] text-ink-muted mt-0.5">
+                          {p.PTS.toLocaleString()} PTS · {p.AST.toLocaleString()} AST · {p.REB.toLocaleString()} REB · {p.STL.toLocaleString()} STL · {p.BLK.toLocaleString()} BLK
                         </div>
                       </td>
 
                       {/* Stats */}
-                      <td className="py-3 px-2.5 font-mono text-xs text-right text-ink">
+                      <td className="py-3 px-1.5 font-mono text-xs text-right text-ink">
                         {p.GP}
                       </td>
-                      <td className="py-3 px-2.5 font-mono text-xs text-right text-ink">
+                      <td className="py-3 px-1.5 font-mono text-xs text-right text-ink">
                         {p.PPG.toFixed(1)}
                       </td>
-                      <td className="py-3 px-2.5 font-mono text-xs text-right text-ink">
+                      <td className="py-3 px-1.5 font-mono text-xs text-right text-ink">
                         {p.APG.toFixed(1)}
                       </td>
-                      <td className="py-3 px-2.5 font-mono text-xs text-right text-ink">
+                      <td className="py-3 px-1.5 font-mono text-xs text-right text-ink">
                         {p.RPG.toFixed(1)}
+                      </td>
+                      <td className="py-3 px-1.5 font-mono text-xs text-right text-ink">
+                        {p.SPG.toFixed(1)}
+                      </td>
+                      <td className="py-3 px-1.5 font-mono text-xs text-right text-ink">
+                        {p.BPG.toFixed(1)}
+                      </td>
+                      <td className="py-3 px-1.5 font-mono text-xs text-right text-ink">
+                        {p.FG_PCT.toFixed(1)}%
                       </td>
 
                       {/* Impact Score */}
                       <td
-                        className={`py-3 px-2.5 font-mono text-base font-bold text-right ${
+                        className={`py-3 px-2 font-mono text-base font-bold text-right ${
                           isFirst ? "text-accent" : "text-ink"
                         }`}
                       >

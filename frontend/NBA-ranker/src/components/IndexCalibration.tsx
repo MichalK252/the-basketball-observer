@@ -96,6 +96,27 @@ export function IndexCalibration({
           />
         </div>
 
+        {/* Defense Slider */}
+        <div className="mb-4">
+          <div className="flex justify-between items-baseline mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-ink">
+              Defense (Stocks: SPG + BPG)
+            </span>
+            <span className="font-mono text-xs font-bold text-accent">
+              {weights.w_def.toFixed(2)}
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={weights.w_def}
+            onChange={(e) => onWeightChange("w_def", parseFloat(e.target.value))}
+            className="w-full h-1.5 bg-paper-dark border border-border-strong rounded-none appearance-none cursor-pointer accent-ink"
+          />
+        </div>
+
         {/* Primary Action Button */}
         <button
           onClick={onCalculate}

@@ -13,6 +13,7 @@ export default function App() {
     w_ppg: 0.5,
     w_apg: 0.3,
     w_rpg: 0.2,
+    w_def: 0.1,
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +28,7 @@ export default function App() {
     setLoading(true);
     setError(null);
     try {
-      const url = `http://127.0.0.1:8000/ranking?w_ppg=${currentWeights.w_ppg}&w_apg=${currentWeights.w_apg}&w_rpg=${currentWeights.w_rpg}`;
+      const url = `http://127.0.0.1:8000/ranking?w_ppg=${currentWeights.w_ppg}&w_apg=${currentWeights.w_apg}&w_rpg=${currentWeights.w_rpg}&w_def=${currentWeights.w_def}`;
       const res = await fetch(url);
       if (!res.ok) {
         throw new Error(`Telegraph server returned error code ${res.status}`);

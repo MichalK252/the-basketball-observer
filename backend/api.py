@@ -24,7 +24,7 @@ names = [
 ]
 
 
-def build_ranking(w_ppg: float = 0.5, w_apg: float = 0.3, w_rpg: float = 0.2):
+def build_ranking(w_ppg: float = 0.5, w_apg: float = 0.3, w_rpg: float = 0.2, w_def: float = 0.1):
     results = []
 
     for name in names:
@@ -40,12 +40,16 @@ def build_ranking(w_ppg: float = 0.5, w_apg: float = 0.3, w_rpg: float = 0.2):
             "PTS": int(df["PTS"].iloc[0]),
             "AST": int(df["AST"].iloc[0]),
             "REB": int(df["REB"].iloc[0]),
-            "GP": int(df["GP"].iloc[0])
+            "GP": int(df["GP"].iloc[0]),
+            "STL": int(df["STL"].iloc[0]) if "STL" in df else 0,
+            "BLK": int(df["BLK"].iloc[0]) if "BLK" in df else 0,
+            "FGM": int(df["FGM"].iloc[0]) if "FGM" in df else 0,
+            "FGA": int(df["FGA"].iloc[0]) if "FGA" in df else 0,
         })
 
     results_df = pd.DataFrame(results)
     results_df = add_per_game_stats(results_df)
-    results_df = add_all_around_score(results_df, w_ppg, w_apg, w_rpg)
+    results_df = add_all_around_score(results_df, w_ppg, w_apg, w_rpg, w_def)
 
     results_df = results_df.sort_values(
         by="ALL_AROUND_SCORE",
@@ -63,8 +67,8 @@ def home():
 import numpy as np
 
 @app.get("/ranking")
-async def ranking(w_ppg: float = 0.5, w_apg: float = 0.3, w_rpg: float = 0.2):
-    df = build_ranking(w_ppg, w_apg, w_rpg)
+async def ranking(w_ppg: float = 0.5, w_apg: float = 0.3, w_rpg: float = 0.2, w_def: float = 0.1):
+    df = build_ranking(w_ppg, w_apg, w_rpg, w_def)
 
     df = df.replace([np.inf, -np.inf], np.nan)
     df = df.fillna(0)
