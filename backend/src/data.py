@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import playercareerstats
+from nba_api.stats.endpoints import playercareerstats, shotchartdetail
 from nba_api.stats.static import teams, players
 import pandas as pd
 from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
@@ -103,5 +103,34 @@ def get_player_seasons(player_id):
         _SEASONS_CACHE[player_id] = sorted_seasons
         return sorted_seasons.copy()
     except Exception as e:
-        print(f"Error fetching seasons for player_id {player_id}: {e}")
+        print(f"Error fetching seasons for this player {player_id}: {e}")
+        return []
+
+_SHOTS_CACHE = {}
+
+def get_player_shots(player_id, season):
+    cache_key = (player_id, season)
+    if cache_key in _SHOTS_CACHE:
+        return _SHOTS_CACHE[cache_key].copy()
+
+    try:
+        sc = shotchartdetail.ShotChartDetail(
+            team_id=0,
+            player_id=player_id,
+            season_nullable=season,
+            context_measure_simple='FGA'  # FGA = Field Goal Attempts (wszystkie próby)
+        )
+        frames = sc.get_data_frames()
+        if not frames or frames[0].empty:
+            return []
+
+        df = frames[0]
+        columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
+        shots = df[columns].to_dict(orient="records")
+
+        _SHOTS_CACHE[cache_key] = shots
+        return shots.copy()
+
+    except Exception as e:
+        print(f"Error fetching shots for this player {player_id}: {e}")
         return []
