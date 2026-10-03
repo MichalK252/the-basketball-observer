@@ -80,3 +80,28 @@ def search_players(query: str, limit: int = 10):
 
     matches = matches.sort_values(by=['is_active', 'full_name'], ascending=[False, True])
     return matches[['id', 'full_name', 'is_active']].head(limit).to_dict(orient="records")
+
+
+
+_SEASONS_CACHE = {}
+
+def get_player_seasons(player_id):
+    if player_id in _SEASONS_CACHE:
+        return _SEASONS_CACHE[player_id].copy()
+
+    try:
+        career = playercareerstats.PlayerCareerStats(player_id=player_id)
+        frames = career.get_data_frames()
+        if not frames or frames[0].empty:
+            return []
+
+        df = frames[0]
+        all_seasons = df['SEASON_ID'].unique()
+        valid_seasons = [s for s in all_seasons if str(s) >= '1996-97']
+        sorted_seasons = sorted(valid_seasons, reverse=True)
+
+        _SEASONS_CACHE[player_id] = sorted_seasons
+        return sorted_seasons.copy()
+    except Exception as e:
+        print(f"Error fetching seasons for player_id {player_id}: {e}")
+        return []
