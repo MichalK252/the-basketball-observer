@@ -1,4 +1,5 @@
 export interface PlayerRank {
+  id?: number;
   Player: string;
   PTS: number;
   AST: number;

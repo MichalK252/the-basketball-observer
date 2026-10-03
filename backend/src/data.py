@@ -40,23 +40,31 @@ def get_career_totals(player_id):
     if player_id in _CAREER_CACHE:
         return _CAREER_CACHE[player_id].copy()
 
-    Player = playercareerstats.PlayerCareerStats(player_id=player_id)
-    df = Player.get_data_frames()[0]
-    df_cleaned = df.groupby('SEASON_ID', group_keys=False).apply(
-        lambda g: g[g['TEAM_ABBREVIATION'] == 'TOT'] if 'TOT' in g['TEAM_ABBREVIATION'].values else g
-    )
-    res = pd.DataFrame([{
-        "GP": df_cleaned["GP"].sum(),
-        "PTS": df_cleaned["PTS"].sum(),
-        "AST": df_cleaned["AST"].sum(),
-        "REB": df_cleaned["REB"].sum(),
-        "STL": df_cleaned["STL"].sum(),
-        "BLK": df_cleaned["BLK"].sum(),
-        "FGM": df_cleaned["FGM"].sum(),
-        "FGA": df_cleaned["FGA"].sum()
-    }])
-    _CAREER_CACHE[player_id] = res
-    return res.copy()
+    try:
+        Player = playercareerstats.PlayerCareerStats(player_id=player_id)
+        frames = Player.get_data_frames()
+        if not frames or frames[0].empty:
+            return pd.DataFrame()
+
+        df = frames[0]
+        df_cleaned = df.groupby('SEASON_ID', group_keys=False).apply(
+            lambda g: g[g['TEAM_ABBREVIATION'] == 'TOT'] if 'TOT' in g['TEAM_ABBREVIATION'].values else g
+        )
+        res = pd.DataFrame([{
+            "GP": df_cleaned["GP"].sum() if "GP" in df_cleaned else 0,
+            "PTS": df_cleaned["PTS"].sum() if "PTS" in df_cleaned else 0,
+            "AST": df_cleaned["AST"].sum() if "AST" in df_cleaned else 0,
+            "REB": df_cleaned["REB"].sum() if "REB" in df_cleaned else 0,
+            "STL": df_cleaned["STL"].sum() if "STL" in df_cleaned else 0,
+            "BLK": df_cleaned["BLK"].sum() if "BLK" in df_cleaned else 0,
+            "FGM": df_cleaned["FGM"].sum() if "FGM" in df_cleaned else 0,
+            "FGA": df_cleaned["FGA"].sum() if "FGA" in df_cleaned else 0
+        }])
+        _CAREER_CACHE[player_id] = res
+        return res.copy()
+    except Exception as e:
+        print(f"Error fetching stats for player_id {player_id}: {e}")
+        return pd.DataFrame()
 
 def search_players(query: str, limit: int = 10):
     if not query or not query.strip():

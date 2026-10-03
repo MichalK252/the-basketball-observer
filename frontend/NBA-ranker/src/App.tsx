@@ -7,8 +7,17 @@ import { RankingTable } from "./components/RankingTable";
 import { ArchiveSearch } from "./components/ArchiveSearch";
 import { EditorialFooter } from "./components/EditorialFooter";
 
+const DEFAULT_NAMES = [
+  "LeBron James",
+  "Stephen Curry",
+  "Luka Dončić",
+  "Giannis Antetokounmpo",
+  "Nikola Jokić",
+];
+
 export default function App() {
   const [players, setPlayers] = useState<PlayerRank[]>([]);
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>(DEFAULT_NAMES);
   const [weights, setWeights] = useState<Weights>({
     w_ppg: 0.5,
     w_apg: 0.3,
@@ -24,28 +33,38 @@ export default function App() {
   const [searching, setSearching] = useState<boolean>(false);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
 
-  const fetchRanking = useCallback(async (currentWeights: Weights) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const url = `http://127.0.0.1:8000/ranking?w_ppg=${currentWeights.w_ppg}&w_apg=${currentWeights.w_apg}&w_rpg=${currentWeights.w_rpg}&w_def=${currentWeights.w_def}`;
-      const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error(`Telegraph server returned error code ${res.status}`);
+  const fetchRanking = useCallback(
+    async (currentWeights: Weights, currentPlayers: string[]) => {
+      if (currentPlayers.length === 0) {
+        setPlayers([]);
+        setLoading(false);
+        return;
       }
-      const data = await res.json();
-      setPlayers(data);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Network error";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+
+      setLoading(true);
+      setError(null);
+      try {
+        const encodedPlayers = encodeURIComponent(currentPlayers.join(","));
+        const url = `http://127.0.0.1:8000/ranking?players=${encodedPlayers}&w_ppg=${currentWeights.w_ppg}&w_apg=${currentWeights.w_apg}&w_rpg=${currentWeights.w_rpg}&w_def=${currentWeights.w_def}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`Telegraph server returned error code ${res.status}`);
+        }
+        const data = await res.json();
+        setPlayers(data);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Network error";
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchRanking(weights);
-  }, [fetchRanking]);
+    fetchRanking(weights, selectedPlayers);
+  }, [fetchRanking]); // initial load
 
   const handleWeightChange = (key: keyof Weights, value: number) => {
     setWeights((prev) => ({
@@ -58,8 +77,37 @@ export default function App() {
     const p = PRESETS[presetName];
     if (p) {
       setWeights(p);
-      fetchRanking(p);
+      fetchRanking(p, selectedPlayers);
     }
+  };
+
+  const handleAddPlayer = (player: SearchPlayer) => {
+    const isAlreadySelected = selectedPlayers.some(
+      (name) => name.toLowerCase() === player.full_name.toLowerCase()
+    );
+    if (isAlreadySelected) return;
+
+    const nextRoster = [...selectedPlayers, player.full_name];
+    setSelectedPlayers(nextRoster);
+    fetchRanking(weights, nextRoster);
+  };
+
+  const handleRemovePlayer = (playerName: string) => {
+    const nextRoster = selectedPlayers.filter(
+      (name) => name.toLowerCase() !== playerName.toLowerCase()
+    );
+    setSelectedPlayers(nextRoster);
+    fetchRanking(weights, nextRoster);
+  };
+
+  const handleResetRoster = () => {
+    setSelectedPlayers(DEFAULT_NAMES);
+    fetchRanking(weights, DEFAULT_NAMES);
+  };
+
+  const handleClearRoster = () => {
+    setSelectedPlayers([]);
+    setPlayers([]);
   };
 
   const handleSearch = async (e?: React.FormEvent) => {
@@ -72,7 +120,7 @@ export default function App() {
       const res = await fetch(
         `http://127.0.0.1:8000/players/search?q=${encodeURIComponent(
           searchQuery.trim()
-        )}&limit=8`
+        )}&limit=10`
       );
       if (res.ok) {
         const data = await res.json();
@@ -96,7 +144,7 @@ export default function App() {
           weights={weights}
           onWeightChange={handleWeightChange}
           onApplyPreset={handleApplyPreset}
-          onCalculate={() => fetchRanking(weights)}
+          onCalculate={() => fetchRanking(weights, selectedPlayers)}
           loading={loading}
         />
 
@@ -104,6 +152,9 @@ export default function App() {
           players={players}
           loading={loading}
           error={error}
+          onRemovePlayer={handleRemovePlayer}
+          onResetRoster={handleResetRoster}
+          onClearRoster={handleClearRoster}
         />
       </div>
 
@@ -115,6 +166,8 @@ export default function App() {
         searching={searching}
         hasSearched={hasSearched}
         searchResults={searchResults}
+        onAddPlayer={handleAddPlayer}
+        enlistedNames={selectedPlayers}
       />
 
       {/* Colophon & Footnotes */}

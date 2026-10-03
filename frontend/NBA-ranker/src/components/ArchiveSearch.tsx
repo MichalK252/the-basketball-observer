@@ -7,6 +7,8 @@ interface ArchiveSearchProps {
   searching: boolean;
   hasSearched: boolean;
   searchResults: SearchPlayer[];
+  onAddPlayer: (player: SearchPlayer) => void;
+  enlistedNames: string[];
 }
 
 export function ArchiveSearch({
@@ -16,6 +18,8 @@ export function ArchiveSearch({
   searching,
   hasSearched,
   searchResults,
+  onAddPlayer,
+  enlistedNames,
 }: ArchiveSearchProps) {
   return (
     <section className="mt-8 border border-border-strong p-5 bg-paper-card shadow-[1px_1px_0px_#111]">
@@ -29,13 +33,13 @@ export function ArchiveSearch({
       </div>
 
       <p className="text-xs text-ink-secondary mb-3 font-serif">
-        Query the historical and active roster database to verify eligibility and player identification numbers.
+        Query the historical and active roster database to verify eligibility and enlist players into the active ledger table.
       </p>
 
       <form onSubmit={onSearch} className="flex gap-2">
         <input
           type="text"
-          placeholder="Search by surname or full name, e.g. 'Bryant', 'Curry', 'Doncic'..."
+          placeholder="Search by surname or full name, e.g. 'Jordan', 'Bryant', 'Curry', 'Wembanyama'..."
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           className="flex-1 border border-border-strong bg-paper px-3 py-2 font-serif text-sm text-ink outline-none focus:border-accent"
@@ -55,28 +59,48 @@ export function ArchiveSearch({
               No registered records matched "{searchQuery}" in the league archive.
             </div>
           ) : (
-            searchResults.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-center py-2.5 px-1 border-b border-dotted border-border-muted text-sm"
-              >
-                <span className="font-serif font-semibold text-ink">
-                  {item.full_name}
-                </span>
-                <div className="font-mono text-xs text-ink-muted flex items-center gap-3">
-                  <span>Registry ID #{item.id}</span>
-                  <span
-                    className={`px-1.5 py-0.5 text-[10px] uppercase border ${
-                      item.is_active
-                        ? "bg-paper-dark text-ink border-border-strong"
-                        : "bg-transparent text-ink-muted border-border-muted"
-                    }`}
-                  >
-                    {item.is_active ? "Active Roster" : "Archived / Retired"}
+            searchResults.map((item) => {
+              const isEnlisted = enlistedNames.some(
+                (name) => name.toLowerCase() === item.full_name.toLowerCase()
+              );
+
+              return (
+                <div
+                  key={item.id}
+                  className="flex flex-wrap justify-between items-center py-2.5 px-1 border-b border-dotted border-border-muted text-sm gap-2"
+                >
+                  <span className="font-serif font-semibold text-ink text-base">
+                    {item.full_name}
                   </span>
+                  <div className="font-mono text-xs text-ink-muted flex items-center gap-3">
+                    <span className="hidden sm:inline">Registry ID #{item.id}</span>
+                    <span
+                      className={`px-1.5 py-0.5 text-[10px] uppercase border ${
+                        item.is_active
+                          ? "bg-paper-dark text-ink border-border-strong"
+                          : "bg-transparent text-ink-muted border-border-muted"
+                      }`}
+                    >
+                      {item.is_active ? "Active Roster" : "Archived / Retired"}
+                    </span>
+
+                    {isEnlisted ? (
+                      <span className="font-mono text-[11px] text-ink-muted italic border border-border-muted px-2 py-0.5 bg-paper-dark/40">
+                        [Enlisted]
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onAddPlayer(item)}
+                        className="bg-paper hover:bg-paper-dark border border-border-strong text-ink hover:text-accent font-serif text-xs font-semibold px-2.5 py-1 cursor-pointer shadow-[1px_1px_0px_#111] transition-transform active:translate-x-0.5 active:translate-y-0.5"
+                      >
+                        + Enlist to Table
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}
