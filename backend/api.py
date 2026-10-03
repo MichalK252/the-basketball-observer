@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import pandas as pd
 
-from src.data import get_player_id, get_career_totals, search_players, players_df
+from src.data import get_player_id, get_career_totals, search_players, players_df, get_player_seasons, get_player_shots
 from src.metrics import add_per_game_stats, add_all_around_score
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -112,3 +112,12 @@ async def ranking(
 @app.get("/players/search")
 async def search(q: str = "", limit: int = 10):
     return search_players(q, limit=limit)
+
+@app.get("/players/{player_id}/seasons")
+async def player_seasons(player_id: int):
+    return get_player_seasons(player_id)
+
+
+@app.get("/players/{player_id}/shots")
+async def player_shots(player_id: int, season: str = "2023-24"):
+    return get_player_shots(player_id, season=season)
