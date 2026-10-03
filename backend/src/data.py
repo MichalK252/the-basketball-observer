@@ -126,7 +126,17 @@ def get_player_shots(player_id, season):
 
         df = frames[0]
         columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
-        shots = df[columns].to_dict(orient="records")
+        existing_cols = [c for c in columns if c in df.columns]
+        clean_df = df[existing_cols].copy()
+        clean_df = clean_df.fillna({
+            'LOC_X': 0,
+            'LOC_Y': 0,
+            'SHOT_MADE_FLAG': 0,
+            'SHOT_TYPE': '',
+            'SHOT_DISTANCE': 0,
+            'ACTION_TYPE': ''
+        })
+        shots = clean_df.to_dict(orient="records")
 
         _SHOTS_CACHE[cache_key] = shots
         return shots.copy()

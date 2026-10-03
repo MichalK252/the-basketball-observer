@@ -119,5 +119,9 @@ async def player_seasons(player_id: int):
 
 
 @app.get("/players/{player_id}/shots")
-async def player_shots(player_id: int, season: str = "2023-24"):
+async def player_shots(player_id: int, season: str | None = None):
+    if not season or season.lower() in ("all", "latest"):
+        available = get_player_seasons(player_id)
+        season = available[0] if available else "2023-24"
+
     return get_player_shots(player_id, season=season)
