@@ -45,170 +45,160 @@ export function CourtChart({ shots, filter }: CourtChartProps) {
 
       <div className="w-full border border-border-strong bg-paper p-2 shadow-inner">
         <svg
-          viewBox="-250 -48 500 360"
+          viewBox="-250 -48 500 470"
           className="w-full h-auto text-ink select-none block"
           style={{
             backgroundColor: "var(--color-paper)",
-            transform: isFlipped ? "rotate(180deg)" : "none",
-            transition: "transform 0.25s ease",
           }}
         >
-          <rect
-            x="-250"
-            y="-48"
-            width="500"
-            height="360"
-            fill="var(--color-paper)"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+          <g transform={isFlipped ? "rotate(180 0 187)" : undefined}>
+            <rect
+              x="-250"
+              y="-47.5"
+              width="500"
+              height="470"
+              fill="var(--color-paper)"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
 
-          <rect
-            x="-246"
-            y="-44"
-            width="492"
-            height="352"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="0.75"
-          />
+            <rect
+              x="-246"
+              y="-43.5"
+              width="492"
+              height="462"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.5"
+              strokeDasharray="2 2"
+              opacity="0.4"
+            />
 
-          <rect
-            x="-80"
-            y="-47.5"
-            width="160"
-            height="190"
-            fill="rgba(0, 0, 0, 0.03)"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+            <rect
+              x="-80"
+              y="-47.5"
+              width="160"
+              height="190"
+              fill="rgba(0, 0, 0, 0.03)"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
 
-          <rect
-            x="-60"
-            y="-47.5"
-            width="120"
-            height="190"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeDasharray="3 3"
-          />
+            <path
+              d="M -60 142.5 A 60 60 0 0 1 60 142.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
+            />
+            <path
+              d="M -60 142.5 A 60 60 0 0 0 60 142.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
 
-          <rect x="-85" y="22.5" width="5" height="10" fill="currentColor" />
-          <rect x="80" y="22.5" width="5" height="10" fill="currentColor" />
+            <rect x="-85" y="22.5" width="5" height="10" fill="currentColor" />
+            <rect x="80" y="22.5" width="5" height="10" fill="currentColor" />
 
-          <line x1="-86" y1="52.5" x2="-80" y2="52.5" stroke="currentColor" strokeWidth="1.5" />
-          <line x1="80" y1="52.5" x2="86" y2="52.5" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="-85" y1="62.5" x2="-80" y2="62.5" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="80" y1="62.5" x2="85" y2="62.5" stroke="currentColor" strokeWidth="1.5" />
 
-          <line x1="-86" y1="82.5" x2="-80" y2="82.5" stroke="currentColor" strokeWidth="1.5" />
-          <line x1="80" y1="82.5" x2="86" y2="82.5" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="-85" y1="92.5" x2="-80" y2="92.5" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="80" y1="92.5" x2="85" y2="92.5" stroke="currentColor" strokeWidth="1.5" />
 
-          <line x1="-86" y1="112.5" x2="-80" y2="112.5" stroke="currentColor" strokeWidth="1.5" />
-          <line x1="80" y1="112.5" x2="86" y2="112.5" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="-85" y1="122.5" x2="-80" y2="122.5" stroke="currentColor" strokeWidth="1.5" />
+            <line x1="80" y1="122.5" x2="85" y2="122.5" stroke="currentColor" strokeWidth="1.5" />
 
-          <path
-            d="M -40 -7.5 L -40 0 A 40 40 0 0 1 40 0 L 40 -7.5"
-            fill="rgba(0, 0, 0, 0.04)"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
+            <path
+              d="M -40 -7.5 L -40 0 A 40 40 0 0 0 40 0 L 40 -7.5"
+              fill="rgba(0, 0, 0, 0.02)"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
 
-          <line
-            x1="-30"
-            y1="-7.5"
-            x2="30"
-            y2="-7.5"
-            stroke="currentColor"
-            strokeWidth="3"
-          />
+            <line
+              x1="-30"
+              y1="-7.5"
+              x2="30"
+              y2="-7.5"
+              stroke="currentColor"
+              strokeWidth="3"
+            />
 
-          <line
-            x1="0"
-            y1="-7.5"
-            x2="0"
-            y2="-5"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+            <line
+              x1="0"
+              y1="-7.5"
+              x2="0"
+              y2="-5"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
 
-          <circle
-            cx="0"
-            cy="0"
-            r="7.5"
-            fill="var(--color-paper)"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+            <circle
+              cx="0"
+              cy="0"
+              r="7.5"
+              fill="var(--color-paper)"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
 
-          <path
-            d="M -60 142.5 A 60 60 0 0 1 60 142.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+            <path
+              d="M -220 -47.5 L -220 89.5 A 237.5 237.5 0 0 0 220 89.5 L 220 -47.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
 
-          <path
-            d="M -60 142.5 A 60 60 0 0 0 60 142.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeDasharray="4 4"
-          />
+            <path
+              d="M -60 422.5 A 60 60 0 0 1 60 422.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+            <path
+              d="M -20 422.5 A 20 20 0 0 1 20 422.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
 
-          <path
-            d="M -220 -47.5 L -220 92.5 A 237.5 237.5 0 0 1 220 92.5 L 220 -47.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          />
+            <g>
+              {filteredShots.map((shot, idx) => {
+                const isMade = shot.SHOT_MADE_FLAG === 1;
 
-          <text x="-238" y="-34" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
-            BASELINE (50 FT)
-          </text>
-          <text x="148" y="-34" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
-            CORNER 3 (22 FT)
-          </text>
-          <text x="-238" y="298" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
-            OUTER ARC (23 FT 9 IN)
-          </text>
-          <text x="132" y="298" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
-            REGULATION NBA SPEC
-          </text>
+                if (isMade) {
+                  return (
+                    <circle
+                      key={idx}
+                      cx={shot.LOC_X}
+                      cy={shot.LOC_Y}
+                      r="3.2"
+                      fill="#111111"
+                      opacity="0.8"
+                      className="cursor-pointer hover:opacity-100"
+                      onMouseEnter={() => setHoveredShot(shot)}
+                      onMouseLeave={() => setHoveredShot(null)}
+                    />
+                  );
+                }
 
-          <g>
-            {filteredShots.map((shot, idx) => {
-              const isMade = shot.SHOT_MADE_FLAG === 1;
-
-              if (isMade) {
                 return (
-                  <circle
+                  <g
                     key={idx}
-                    cx={shot.LOC_X}
-                    cy={shot.LOC_Y}
-                    r="3.2"
-                    fill="#111111"
-                    opacity="0.8"
+                    transform={`translate(${shot.LOC_X}, ${shot.LOC_Y})`}
+                    opacity="0.75"
                     className="cursor-pointer hover:opacity-100"
                     onMouseEnter={() => setHoveredShot(shot)}
                     onMouseLeave={() => setHoveredShot(null)}
-                  />
+                  >
+                    <line x1="-2.8" y1="-2.8" x2="2.8" y2="2.8" stroke="#8b1e0f" strokeWidth="1.5" />
+                    <line x1="-2.8" y1="2.8" x2="2.8" y2="-2.8" stroke="#8b1e0f" strokeWidth="1.5" />
+                  </g>
                 );
-              }
-
-              return (
-                <g
-                  key={idx}
-                  transform={`translate(${shot.LOC_X}, ${shot.LOC_Y})`}
-                  opacity="0.75"
-                  className="cursor-pointer hover:opacity-100"
-                  onMouseEnter={() => setHoveredShot(shot)}
-                  onMouseLeave={() => setHoveredShot(null)}
-                >
-                  <line x1="-2.8" y1="-2.8" x2="2.8" y2="2.8" stroke="#8b1e0f" strokeWidth="1.5" />
-                  <line x1="-2.8" y1="2.8" x2="2.8" y2="-2.8" stroke="#8b1e0f" strokeWidth="1.5" />
-                </g>
-              );
-            })}
+              })}
+            </g>
           </g>
         </svg>
       </div>
