@@ -135,12 +135,12 @@ export default function App() {
   };
 
   return (
-    <div className="max-w-[1020px] mx-auto px-4 py-6 sm:px-6 sm:py-8 w-full">
+    <div className="max-w-[1100px] mx-auto px-4 py-5 sm:px-6 w-full">
       <Masthead activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === "ranking" ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-7 border-b border-border-strong pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 border-b border-border-strong pb-8">
             <IndexCalibration
               weights={weights}
               onWeightChange={handleWeightChange}
