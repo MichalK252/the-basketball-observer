@@ -28,3 +28,12 @@ export interface Weights {
   w_rpg: number;
   w_def: number;
 }
+
+export interface Shot {
+  LOC_X: number;
+  LOC_Y: number;
+  SHOT_MADE_FLAG: number;
+  SHOT_TYPE: string;
+  SHOT_DISTANCE: number;
+  ACTION_TYPE: string;
+}

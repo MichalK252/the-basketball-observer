@@ -6,6 +6,7 @@ import { IndexCalibration } from "./components/IndexCalibration";
 import { RankingTable } from "./components/RankingTable";
 import { ArchiveSearch } from "./components/ArchiveSearch";
 import { EditorialFooter } from "./components/EditorialFooter";
+import { ShotChartView } from "./components/ShotChartView";
 
 const DEFAULT_NAMES = [
   "LeBron James",
@@ -16,6 +17,7 @@ const DEFAULT_NAMES = [
 ];
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState<"ranking" | "shotchart">("ranking");
   const [players, setPlayers] = useState<PlayerRank[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>(DEFAULT_NAMES);
   const [weights, setWeights] = useState<Weights>({
@@ -27,7 +29,6 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Search archive state
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SearchPlayer[]>([]);
   const [searching, setSearching] = useState<boolean>(false);
@@ -64,7 +65,7 @@ export default function App() {
 
   useEffect(() => {
     fetchRanking(weights, selectedPlayers);
-  }, [fetchRanking]); // initial load
+  }, [fetchRanking]);
 
   const handleWeightChange = (key: keyof Weights, value: number) => {
     setWeights((prev) => ({
@@ -127,7 +128,7 @@ export default function App() {
         setSearchResults(data);
       }
     } catch {
-      // silently handle network search errors
+      setSearchResults([]);
     } finally {
       setSearching(false);
     }
@@ -135,42 +136,44 @@ export default function App() {
 
   return (
     <div className="max-w-[1020px] mx-auto px-4 py-6 sm:px-6 sm:py-8 w-full">
-      {/* Newspaper Masthead */}
-      <Masthead />
+      <Masthead activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* Main Two-Column Editorial Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-7 border-b border-border-strong pb-8">
-        <IndexCalibration
-          weights={weights}
-          onWeightChange={handleWeightChange}
-          onApplyPreset={handleApplyPreset}
-          onCalculate={() => fetchRanking(weights, selectedPlayers)}
-          loading={loading}
-        />
+      {activeTab === "ranking" ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-7 border-b border-border-strong pb-8">
+            <IndexCalibration
+              weights={weights}
+              onWeightChange={handleWeightChange}
+              onApplyPreset={handleApplyPreset}
+              onCalculate={() => fetchRanking(weights, selectedPlayers)}
+              loading={loading}
+            />
 
-        <RankingTable
-          players={players}
-          loading={loading}
-          error={error}
-          onRemovePlayer={handleRemovePlayer}
-          onResetRoster={handleResetRoster}
-          onClearRoster={handleClearRoster}
-        />
-      </div>
+            <RankingTable
+              players={players}
+              loading={loading}
+              error={error}
+              onRemovePlayer={handleRemovePlayer}
+              onResetRoster={handleResetRoster}
+              onClearRoster={handleClearRoster}
+            />
+          </div>
 
-      {/* Archival Inquiry & Player Registry */}
-      <ArchiveSearch
-        searchQuery={searchQuery}
-        onSearchQueryChange={setSearchQuery}
-        onSearch={handleSearch}
-        searching={searching}
-        hasSearched={hasSearched}
-        searchResults={searchResults}
-        onAddPlayer={handleAddPlayer}
-        enlistedNames={selectedPlayers}
-      />
+          <ArchiveSearch
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            onSearch={handleSearch}
+            searching={searching}
+            hasSearched={hasSearched}
+            searchResults={searchResults}
+            onAddPlayer={handleAddPlayer}
+            enlistedNames={selectedPlayers}
+          />
+        </>
+      ) : (
+        <ShotChartView />
+      )}
 
-      {/* Colophon & Footnotes */}
       <EditorialFooter />
     </div>
   );
