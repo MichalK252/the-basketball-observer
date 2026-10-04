@@ -8,6 +8,7 @@ interface CourtChartProps {
 
 export function CourtChart({ shots, filter }: CourtChartProps) {
   const [hoveredShot, setHoveredShot] = useState<Shot | null>(null);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const filteredShots = shots.filter((shot) => {
     if (filter === "made") return shot.SHOT_MADE_FLAG === 1;
@@ -18,173 +19,199 @@ export function CourtChart({ shots, filter }: CourtChartProps) {
   });
 
   return (
-    <div className="relative w-full max-w-[620px] mx-auto bg-paper-card border border-border-strong p-4 shadow-[1px_1px_0px_#111]">
-      <div className="h-6 mb-2 text-center font-mono text-[11px] text-ink-secondary truncate">
-        {hoveredShot ? (
-          <span className="bg-paper px-2 py-0.5 border border-border-strong">
-            {hoveredShot.ACTION_TYPE} · {hoveredShot.SHOT_DISTANCE} ft · {hoveredShot.SHOT_TYPE} ·{" "}
-            <strong className={hoveredShot.SHOT_MADE_FLAG === 1 ? "text-ink" : "text-accent"}>
-              {hoveredShot.SHOT_MADE_FLAG === 1 ? "MADE [●]" : "MISSED [✕]"}
-            </strong>
-          </span>
-        ) : (
-          <span className="text-ink-muted">Hover cursor over plotted coordinates for shot dispatch</span>
-        )}
+    <div className="relative w-full max-w-[640px] mx-auto bg-paper-card border border-border-strong p-4 shadow-[1px_1px_0px_#111]">
+      <div className="flex justify-between items-center mb-2 font-mono text-[11px] text-ink-secondary">
+        <div className="h-6 flex items-center truncate max-w-[420px]">
+          {hoveredShot ? (
+            <span className="bg-paper px-2 py-0.5 border border-border-strong">
+              {hoveredShot.ACTION_TYPE} · {hoveredShot.SHOT_DISTANCE} ft · {hoveredShot.SHOT_TYPE} ·{" "}
+              <strong className={hoveredShot.SHOT_MADE_FLAG === 1 ? "text-ink" : "text-accent"}>
+                {hoveredShot.SHOT_MADE_FLAG === 1 ? "MADE [●]" : "MISSED [✕]"}
+              </strong>
+            </span>
+          ) : (
+            <span className="text-ink-muted">Hover cursor over plotted coordinates for shot dispatch</span>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsFlipped((prev) => !prev)}
+          className="bg-paper hover:bg-paper-dark border border-border-strong px-2 py-0.5 text-[10px] uppercase font-mono cursor-pointer shadow-[1px_1px_0px_#111] transition-transform active:translate-x-0.5 active:translate-y-0.5"
+        >
+          {isFlipped ? "Flip: Hoop at Top" : "Flip: Hoop at Bottom"}
+        </button>
       </div>
 
-      <svg
-        viewBox="-250 -52 500 472"
-        className="w-full h-auto text-ink select-none block"
-        style={{ backgroundColor: "var(--color-paper)" }}
-      >
-        <rect
-          x="-250"
-          y="-52"
-          width="500"
-          height="470"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+      <div className="w-full border border-border-strong bg-paper p-2 shadow-inner">
+        <svg
+          viewBox="-250 -48 500 360"
+          className="w-full h-auto text-ink select-none block"
+          style={{
+            backgroundColor: "var(--color-paper)",
+            transform: isFlipped ? "rotate(180deg)" : "none",
+            transition: "transform 0.25s ease",
+          }}
+        >
+          <rect
+            x="-250"
+            y="-48"
+            width="500"
+            height="360"
+            fill="var(--color-paper)"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
 
-        <line
-          x1="-30"
-          y1="-7.5"
-          x2="30"
-          y2="-7.5"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+          <rect
+            x="-246"
+            y="-44"
+            width="492"
+            height="352"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="0.75"
+          />
 
-        <circle
-          cx="0"
-          cy="0"
-          r="7.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+          <rect
+            x="-80"
+            y="-47.5"
+            width="160"
+            height="190"
+            fill="rgba(0, 0, 0, 0.03)"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
 
-        <path
-          d="M -40 -7.5 A 40 40 0 0 1 40 -7.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeDasharray="3 3"
-        />
+          <rect
+            x="-60"
+            y="-47.5"
+            width="120"
+            height="190"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3 3"
+          />
 
-        <rect
-          x="-80"
-          y="-52"
-          width="160"
-          height="190"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+          <rect x="-85" y="22.5" width="5" height="10" fill="currentColor" />
+          <rect x="80" y="22.5" width="5" height="10" fill="currentColor" />
 
-        <rect
-          x="-60"
-          y="-52"
-          width="120"
-          height="190"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        />
+          <line x1="-86" y1="52.5" x2="-80" y2="52.5" stroke="currentColor" strokeWidth="1.5" />
+          <line x1="80" y1="52.5" x2="86" y2="52.5" stroke="currentColor" strokeWidth="1.5" />
 
-        <path
-          d="M -60 138 A 60 60 0 0 1 60 138"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
+          <line x1="-86" y1="82.5" x2="-80" y2="82.5" stroke="currentColor" strokeWidth="1.5" />
+          <line x1="80" y1="82.5" x2="86" y2="82.5" stroke="currentColor" strokeWidth="1.5" />
 
-        <path
-          d="M -60 138 A 60 60 0 0 0 60 138"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-        />
+          <line x1="-86" y1="112.5" x2="-80" y2="112.5" stroke="currentColor" strokeWidth="1.5" />
+          <line x1="80" y1="112.5" x2="86" y2="112.5" stroke="currentColor" strokeWidth="1.5" />
 
-        <line
-          x1="-220"
-          y1="-52"
-          x2="-220"
-          y2="88"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+          <path
+            d="M -40 -7.5 L -40 0 A 40 40 0 0 1 40 0 L 40 -7.5"
+            fill="rgba(0, 0, 0, 0.04)"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
 
-        <line
-          x1="220"
-          y1="-52"
-          x2="220"
-          y2="88"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+          <line
+            x1="-30"
+            y1="-7.5"
+            x2="30"
+            y2="-7.5"
+            stroke="currentColor"
+            strokeWidth="3"
+          />
 
-        <path
-          d="M -220 88 A 237.5 237.5 0 0 1 220 88"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+          <line
+            x1="0"
+            y1="-7.5"
+            x2="0"
+            y2="-5"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
 
-        <line
-          x1="-250"
-          y1="418"
-          x2="250"
-          y2="418"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
+          <circle
+            cx="0"
+            cy="0"
+            r="7.5"
+            fill="var(--color-paper)"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
 
-        <path
-          d="M -60 418 A 60 60 0 0 1 60 418"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
+          <path
+            d="M -60 142.5 A 60 60 0 0 1 60 142.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
 
-        <g>
-          {filteredShots.map((shot, idx) => {
-            const isMade = shot.SHOT_MADE_FLAG === 1;
+          <path
+            d="M -60 142.5 A 60 60 0 0 0 60 142.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeDasharray="4 4"
+          />
 
-            if (isMade) {
+          <path
+            d="M -220 -47.5 L -220 92.5 A 237.5 237.5 0 0 1 220 92.5 L 220 -47.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          />
+
+          <text x="-238" y="-34" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
+            BASELINE (50 FT)
+          </text>
+          <text x="148" y="-34" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
+            CORNER 3 (22 FT)
+          </text>
+          <text x="-238" y="298" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
+            OUTER ARC (23 FT 9 IN)
+          </text>
+          <text x="132" y="298" fontFamily="var(--font-mono)" fontSize="6.5" fill="var(--color-ink-muted)">
+            REGULATION NBA SPEC
+          </text>
+
+          <g>
+            {filteredShots.map((shot, idx) => {
+              const isMade = shot.SHOT_MADE_FLAG === 1;
+
+              if (isMade) {
+                return (
+                  <circle
+                    key={idx}
+                    cx={shot.LOC_X}
+                    cy={shot.LOC_Y}
+                    r="3.2"
+                    fill="#111111"
+                    opacity="0.8"
+                    className="cursor-pointer hover:opacity-100"
+                    onMouseEnter={() => setHoveredShot(shot)}
+                    onMouseLeave={() => setHoveredShot(null)}
+                  />
+                );
+              }
+
               return (
-                <circle
+                <g
                   key={idx}
-                  cx={shot.LOC_X}
-                  cy={shot.LOC_Y}
-                  r="3.2"
-                  fill="#111111"
+                  transform={`translate(${shot.LOC_X}, ${shot.LOC_Y})`}
                   opacity="0.75"
-                  className="cursor-pointer hover:opacity-100 hover:r-[5]"
+                  className="cursor-pointer hover:opacity-100"
                   onMouseEnter={() => setHoveredShot(shot)}
                   onMouseLeave={() => setHoveredShot(null)}
-                />
+                >
+                  <line x1="-2.8" y1="-2.8" x2="2.8" y2="2.8" stroke="#8b1e0f" strokeWidth="1.5" />
+                  <line x1="-2.8" y1="2.8" x2="2.8" y2="-2.8" stroke="#8b1e0f" strokeWidth="1.5" />
+                </g>
               );
-            }
-
-            return (
-              <g
-                key={idx}
-                transform={`translate(${shot.LOC_X}, ${shot.LOC_Y})`}
-                opacity="0.65"
-                className="cursor-pointer hover:opacity-100"
-                onMouseEnter={() => setHoveredShot(shot)}
-                onMouseLeave={() => setHoveredShot(null)}
-              >
-                <line x1="-2.8" y1="-2.8" x2="2.8" y2="2.8" stroke="#8b1e0f" strokeWidth="1.4" />
-                <line x1="-2.8" y1="2.8" x2="2.8" y2="-2.8" stroke="#8b1e0f" strokeWidth="1.4" />
-              </g>
-            );
-          })}
-        </g>
-      </svg>
+            })}
+          </g>
+        </svg>
+      </div>
 
       <div className="mt-3 pt-2 border-t border-border-muted flex justify-between items-center font-mono text-[11px] text-ink-secondary">
         <div className="flex items-center gap-4">
@@ -197,7 +224,7 @@ export function CourtChart({ shots, filter }: CourtChartProps) {
             Missed Shot ({shots.filter((s) => s.SHOT_MADE_FLAG === 0).length})
           </span>
         </div>
-        <span>Total: {shots.length}</span>
+        <span>Total Dispatched: {shots.length}</span>
       </div>
     </div>
   );
