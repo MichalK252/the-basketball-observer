@@ -7,6 +7,7 @@ import { RankingTable } from "./components/RankingTable";
 import { ArchiveSearch } from "./components/ArchiveSearch";
 import { EditorialFooter } from "./components/EditorialFooter";
 import { ShotChartView } from "./components/ShotChartView";
+import { DnaAnalysisView } from "./components/DnaAnalysisView";
 
 const DEFAULT_NAMES = [
   "LeBron James",
@@ -17,7 +18,8 @@ const DEFAULT_NAMES = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"ranking" | "shotchart">("ranking");
+  const [activeTab, setActiveTab] = useState<"ranking" | "shotchart" | "dna">("ranking");
+
   const [players, setPlayers] = useState<PlayerRank[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>(DEFAULT_NAMES);
   const [weights, setWeights] = useState<Weights>({
@@ -138,7 +140,7 @@ export default function App() {
     <div className="max-w-[1100px] mx-auto px-4 py-5 sm:px-6 w-full">
       <Masthead activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {activeTab === "ranking" ? (
+      {activeTab === "ranking" && (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 border-b border-border-strong pb-8">
             <IndexCalibration
@@ -170,11 +172,13 @@ export default function App() {
             enlistedNames={selectedPlayers}
           />
         </>
-      ) : (
-        <ShotChartView />
       )}
+
+      {activeTab === "shotchart" && <ShotChartView />}
+
+      {activeTab === "dna" && <DnaAnalysisView />}
 
       <EditorialFooter />
     </div>
   );
-}
+}

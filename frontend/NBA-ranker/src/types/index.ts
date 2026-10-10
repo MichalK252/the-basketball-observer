@@ -37,3 +37,37 @@ export interface Shot {
   SHOT_DISTANCE: number;
   ACTION_TYPE: string;
 }
+
+export interface RadarStats {
+  Scoring: number;
+  Playmaking: number;
+  Rebounding: number;
+  Defense: number;
+  Efficiency: number;
+}
+
+export interface SimilarPlayer {
+  id: number;
+  name: string;
+  similarity_pct: number;
+}
+
+export interface PcaPoint {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  archetype: string;
+  is_target: boolean;
+}
+
+export interface DnaResponse {
+  player_id: number;
+  name: string;
+  archetype: string;
+  confidence: number;
+  radar: RadarStats;
+  similar_players: SimilarPlayer[];
+  league_map: PcaPoint[];
+}
+

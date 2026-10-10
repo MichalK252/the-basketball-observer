@@ -1,6 +1,6 @@
 interface MastheadProps {
-  activeTab: "ranking" | "shotchart";
-  onTabChange: (tab: "ranking" | "shotchart") => void;
+  activeTab: "ranking" | "shotchart" | "dna";
+  onTabChange: (tab: "ranking" | "shotchart" | "dna") => void;
 }
 
 export function Masthead({ activeTab, onTabChange }: MastheadProps) {
@@ -11,34 +11,47 @@ export function Masthead({ activeTab, onTabChange }: MastheadProps) {
           The Basketball Observer
         </h1>
         <p className="font-mono text-xs uppercase tracking-widest text-ink-secondary mt-2">
-          NBA Player Impact Valuation & Shot Dispersion
+          NBA Player Impact Valuation, Shot Dispersion & Style Archetypes
         </p>
       </div>
 
-      <nav className="flex flex-wrap border-t-2 border-b-2 border-border-strong font-mono text-xs uppercase tracking-wider">
+      <nav className="grid grid-cols-3 border-t-2 border-b-2 border-border-strong font-mono text-xs uppercase tracking-wider divide-x divide-border-strong">
         <button
           type="button"
           onClick={() => onTabChange("ranking")}
-          className={`px-4 py-2 border-r border-border-strong cursor-pointer transition-colors ${
+          className={`py-2.5 px-2 text-center cursor-pointer transition-colors truncate ${
             activeTab === "ranking"
               ? "bg-ink text-paper font-bold"
               : "bg-paper text-ink hover:bg-paper-dark"
           }`}
         >
-          Section I: Canonical Ranking Ledger
+          Section I: Ranking Ledger
         </button>
         <button
           type="button"
           onClick={() => onTabChange("shotchart")}
-          className={`px-4 py-2 border-r border-border-strong cursor-pointer transition-colors ${
+          className={`py-2.5 px-2 text-center cursor-pointer transition-colors truncate ${
             activeTab === "shotchart"
               ? "bg-ink text-paper font-bold"
               : "bg-paper text-ink hover:bg-paper-dark"
           }`}
         >
-          Section II: Hardwood Shot Dispersion Chart
+          Section II: Shot Dispersion
+        </button>
+        <button
+          type="button"
+          onClick={() => onTabChange("dna")}
+          className={`py-2.5 px-2 text-center cursor-pointer transition-colors truncate ${
+            activeTab === "dna"
+              ? "bg-ink text-paper font-bold"
+              : "bg-paper text-ink hover:bg-paper-dark"
+          }`}
+        >
+          Section III: Style DNA
         </button>
       </nav>
     </header>
   );
 }
+
+
