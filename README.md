@@ -1,4 +1,4 @@
-# NBA Player Impact Ranker
+# The Basketball Observer
 
 A full-stack basketball analytics platform that combines real-time and historical NBA statistics to evaluate player impact, map shot dispersion on an authentic half-court projection, and identify player archetypes using dimensionality reduction and vector similarity.
 
@@ -11,7 +11,7 @@ The interface is styled after a classic broadsheet newspaper ("The Basketball Ob
 The project is structured as a decoupled client-server architecture:
 
 ```
-NbaPlayerImpactRanker/
+the-basketball-observer/
 ├── backend/
 │   ├── api.py                  # FastAPI service and route definitions
 │   ├── data/
