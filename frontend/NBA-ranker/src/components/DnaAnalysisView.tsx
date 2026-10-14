@@ -280,16 +280,17 @@ export function DnaAnalysisView() {
               <div className="border border-border-muted bg-paper p-3 flex flex-col justify-between">
                 <div>
                   <div className="font-mono text-xs font-bold uppercase text-ink mb-1">
-                    Fig. I · Scoring Volume vs Shooting Accuracy
+                    Fig. I · Scoring Volume vs Shooting Accuracy ({data.name})
                   </div>
                   <p className="font-serif text-xs text-ink-secondary mb-3 leading-relaxed">
-                    Cartesian distribution of NBA icons plotted by scoring volume (PPG) against shooting efficiency (FG%). Dashed crosshairs indicate historical dataset mean thresholds.
+                    Highlights {data.name} on the historical efficiency landscape vs 50 NBA superstars. Dashed crosshairs indicate league average scoring volume and accuracy.
                   </p>
                 </div>
                 <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center min-h-[260px]">
                   <img
-                    src={`${getApiHost()}/analytics/plots/efficiency.png`}
-                    alt="Scoring Volume vs Shooting Efficiency"
+                    key={`eff-${selectedPlayerId}`}
+                    src={`${getApiHost()}/analytics/plots/efficiency.png?player_id=${selectedPlayerId}`}
+                    alt={`Scoring Volume vs Shooting Accuracy - ${data.name}`}
                     className="w-full h-auto object-contain block"
                     crossOrigin="anonymous"
                     onError={(e) => {
@@ -297,8 +298,8 @@ export function DnaAnalysisView() {
                       if (!target.dataset.retried) {
                         target.dataset.retried = "true";
                         target.src = target.src.includes("localhost")
-                          ? "http://127.0.0.1:8000/analytics/plots/efficiency.png"
-                          : "http://localhost:8000/analytics/plots/efficiency.png";
+                          ? `http://127.0.0.1:8000/analytics/plots/efficiency.png?player_id=${selectedPlayerId}`
+                          : `http://localhost:8000/analytics/plots/efficiency.png?player_id=${selectedPlayerId}`;
                       }
                     }}
                   />
@@ -308,16 +309,17 @@ export function DnaAnalysisView() {
               <div className="border border-border-muted bg-paper p-3 flex flex-col justify-between">
                 <div>
                   <div className="font-mono text-xs font-bold uppercase text-ink mb-1">
-                    Fig. II · Feature Correlation Matrix
+                    Fig. II · Career Trajectory & Prime Window ({data.name})
                   </div>
                   <p className="font-serif text-xs text-ink-secondary mb-3 leading-relaxed">
-                    Pearson correlation coefficients computed across scoring, playmaking, rebounding, defensive impact, and shooting efficiency dimensions across 50 NBA legends.
+                    Season-by-season progression across points (PPG), assists (APG), and rebounds (RPG), pinpointing the peak scoring prime season for {data.name}.
                   </p>
                 </div>
                 <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center min-h-[260px]">
                   <img
-                    src={`${getApiHost()}/analytics/plots/correlation.png`}
-                    alt="Feature Correlation Matrix"
+                    key={`traj-${selectedPlayerId}`}
+                    src={`${getApiHost()}/analytics/plots/trajectory.png?player_id=${selectedPlayerId}`}
+                    alt={`Career Trajectory - ${data.name}`}
                     className="w-full h-auto object-contain block"
                     crossOrigin="anonymous"
                     onError={(e) => {
@@ -325,13 +327,14 @@ export function DnaAnalysisView() {
                       if (!target.dataset.retried) {
                         target.dataset.retried = "true";
                         target.src = target.src.includes("localhost")
-                          ? "http://127.0.0.1:8000/analytics/plots/correlation.png"
-                          : "http://localhost:8000/analytics/plots/correlation.png";
+                          ? `http://127.0.0.1:8000/analytics/plots/trajectory.png?player_id=${selectedPlayerId}`
+                          : `http://localhost:8000/analytics/plots/trajectory.png?player_id=${selectedPlayerId}`;
                       }
                     }}
                   />
                 </div>
               </div>
+
 
             </div>
           </div>
