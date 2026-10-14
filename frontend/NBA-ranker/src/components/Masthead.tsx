@@ -7,6 +7,19 @@ export function Masthead({ activeTab, onTabChange }: MastheadProps) {
   return (
     <header className="mb-6">
       <div className="text-center pt-2 pb-4">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <div className="h-px w-10 sm:w-16 bg-border-strong"></div>
+          <svg className="w-5 h-5 text-ink fill-current" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="29" fill="#c25e2e" stroke="currentColor" strokeWidth="3" />
+            <g stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" fill="none">
+              <line x1="32" y1="3" x2="32" y2="61" />
+              <line x1="3" y1="32" x2="61" y2="32" />
+              <path d="M 12 11 C 25 20, 25 44, 12 53" />
+              <path d="M 52 11 C 39 20, 39 44, 52 53" />
+            </g>
+          </svg>
+          <div className="h-px w-10 sm:w-16 bg-border-strong"></div>
+        </div>
         <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight uppercase leading-none text-ink">
           The Basketball Observer
         </h1>
