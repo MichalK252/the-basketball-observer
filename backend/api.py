@@ -5,6 +5,8 @@ from src.data import get_player_id, get_career_totals, search_players, players_d
 from src.metrics import add_per_game_stats, add_all_around_score
 from fastapi.middleware.cors import CORSMiddleware
 from src.dna import get_dna_analysis, load_dna_database
+from fastapi.responses import Response
+from src.viz import generate_efficiency_plot, generate_correlation_plot
 
 app = FastAPI()
 
@@ -159,4 +161,19 @@ async def player_dna(player_id: int):
         return {"error": "Player not found"}
 
     return data
-
+
+@app.get("/analytics/plots/efficiency.png")
+def plot_efficiency():
+    df = load_dna_database()
+    if df.empty:
+        df = build_ranking()
+    image_bytes = generate_efficiency_plot(df)
+    return Response(content=image_bytes, media_type="image/png")
+
+@app.get("/analytics/plots/correlation.png")
+def plot_correlation():
+    df = load_dna_database()
+    if df.empty:
+        df = build_ranking()
+    image_bytes = generate_correlation_plot(df)
+    return Response(content=image_bytes, media_type="image/png")
