@@ -257,6 +257,57 @@ export function DnaAnalysisView() {
               }}
             />
           </div>
+
+          <div className="bg-paper-card border border-border-strong p-4 shadow-[1px_1px_0px_#111]">
+            <div className="flex justify-between items-center mb-3 pb-2 border-b border-border-muted font-mono text-xs">
+              <span className="uppercase tracking-wider font-bold text-ink">
+                Hardwood Statistical Dispatches · Matplotlib Engine
+              </span>
+              <span className="text-ink-secondary text-[11px]">
+                Server-Rendered Exploratory Data Analysis
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="border border-border-muted bg-paper p-3 flex flex-col justify-between">
+                <div>
+                  <div className="font-mono text-xs font-bold uppercase text-ink mb-1">
+                    Fig. I · Scoring Volume vs Shooting Accuracy
+                  </div>
+                  <p className="font-serif text-xs text-ink-secondary mb-3 leading-relaxed">
+                    Cartesian distribution of NBA icons plotted by scoring volume (PPG) against shooting efficiency (FG%). Dashed crosshairs indicate historical dataset mean thresholds.
+                  </p>
+                </div>
+                <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                  <img
+                    src="http://127.0.0.1:8000/analytics/plots/efficiency.png"
+                    alt="Scoring Volume vs Shooting Efficiency"
+                    className="w-full h-auto object-contain block"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+
+              <div className="border border-border-muted bg-paper p-3 flex flex-col justify-between">
+                <div>
+                  <div className="font-mono text-xs font-bold uppercase text-ink mb-1">
+                    Fig. II · Feature Correlation Matrix
+                  </div>
+                  <p className="font-serif text-xs text-ink-secondary mb-3 leading-relaxed">
+                    Pearson correlation coefficients computed across scoring, playmaking, rebounding, defensive impact, and shooting efficiency dimensions across 50 NBA legends.
+                  </p>
+                </div>
+                <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                  <img
+                    src="http://127.0.0.1:8000/analytics/plots/correlation.png"
+                    alt="Feature Correlation Matrix"
+                    className="w-full h-auto object-contain block"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>
