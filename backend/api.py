@@ -6,7 +6,7 @@ from src.metrics import add_per_game_stats, add_all_around_score
 from fastapi.middleware.cors import CORSMiddleware
 from src.dna import get_dna_analysis, load_dna_database
 from fastapi.responses import Response
-from src.viz import generate_efficiency_plot, generate_correlation_plot
+from src.viz import generate_efficiency_plot, generate_correlation_plot, generate_trajectory_plot
 
 app = FastAPI()
 
@@ -171,11 +171,47 @@ async def player_dna(player_id: int):
     return data
 
 @app.get("/analytics/plots/efficiency.png")
-def plot_efficiency():
+def plot_efficiency(player_id: int | None = None):
     df = load_dna_database()
     if df.empty:
         df = build_ranking()
-    image_bytes = generate_efficiency_plot(df)
+
+    if player_id and player_id not in df['id'].values:
+        match = players_df[players_df['id'] == player_id]
+        player_name = match['full_name'].iloc[0] if not match.empty else f"Player #{player_id}"
+        career_df = get_career_totals(player_id)
+        if not career_df.empty and career_df["GP"].iloc[0] > 0:
+            new_row = {
+                "id": player_id,
+                "Player": player_name,
+                "PTS": int(career_df["PTS"].iloc[0]),
+                "AST": int(career_df["AST"].iloc[0]),
+                "REB": int(career_df["REB"].iloc[0]),
+                "GP": int(career_df["GP"].iloc[0]),
+                "STL": int(career_df["STL"].iloc[0]) if "STL" in career_df else 0,
+                "BLK": int(career_df["BLK"].iloc[0]) if "BLK" in career_df else 0,
+                "FGM": int(career_df["FGM"].iloc[0]) if "FGM" in career_df else 0,
+                "FGA": int(career_df["FGA"].iloc[0]) if "FGA" in career_df else 0,
+            }
+            new_df = pd.DataFrame([new_row])
+            new_df = add_per_game_stats(new_df)
+            df = pd.concat([df, new_df], ignore_index=True)
+
+    image_bytes = generate_efficiency_plot(df, target_player_id=player_id)
+    return Response(
+        content=image_bytes,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Access-Control-Allow-Origin": "*",
+        },
+    )
+
+@app.get("/analytics/plots/trajectory.png")
+def plot_trajectory(player_id: int = 203999):
+    match = players_df[players_df['id'] == player_id]
+    player_name = match['full_name'].iloc[0] if not match.empty else f"Player #{player_id}"
+    image_bytes = generate_trajectory_plot(player_id, player_name=player_name)
     return Response(
         content=image_bytes,
         media_type="image/png",
@@ -199,4 +235,5 @@ def plot_correlation():
             "Access-Control-Allow-Origin": "*",
         },
     )
+
 
