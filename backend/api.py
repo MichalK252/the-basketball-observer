@@ -12,11 +12,19 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 DEFAULT_PLAYERS = [
     'LeBron James',
@@ -168,7 +176,14 @@ def plot_efficiency():
     if df.empty:
         df = build_ranking()
     image_bytes = generate_efficiency_plot(df)
-    return Response(content=image_bytes, media_type="image/png")
+    return Response(
+        content=image_bytes,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Access-Control-Allow-Origin": "*",
+        },
+    )
 
 @app.get("/analytics/plots/correlation.png")
 def plot_correlation():
@@ -176,4 +191,12 @@ def plot_correlation():
     if df.empty:
         df = build_ranking()
     image_bytes = generate_correlation_plot(df)
-    return Response(content=image_bytes, media_type="image/png")
+    return Response(
+        content=image_bytes,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Access-Control-Allow-Origin": "*",
+        },
+    )
+

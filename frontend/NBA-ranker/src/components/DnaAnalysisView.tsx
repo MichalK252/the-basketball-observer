@@ -30,6 +30,14 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
     "Versatile multi-category asset without statistical liability, balancing scoring, rebounding, and facilitation across possessions.",
 };
 
+const getApiHost = () => {
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return "http://localhost:8000";
+  }
+  return "http://127.0.0.1:8000";
+};
+
+
 export function DnaAnalysisView() {
   const [selectedPlayerId, setSelectedPlayerId] = useState<number>(203999);
   const [selectedPlayerName, setSelectedPlayerName] = useState<string>("Nikola Jokić");
@@ -278,12 +286,21 @@ export function DnaAnalysisView() {
                     Cartesian distribution of NBA icons plotted by scoring volume (PPG) against shooting efficiency (FG%). Dashed crosshairs indicate historical dataset mean thresholds.
                   </p>
                 </div>
-                <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center min-h-[260px]">
                   <img
-                    src="http://127.0.0.1:8000/analytics/plots/efficiency.png"
+                    src={`${getApiHost()}/analytics/plots/efficiency.png`}
                     alt="Scoring Volume vs Shooting Efficiency"
                     className="w-full h-auto object-contain block"
-                    loading="lazy"
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.dataset.retried) {
+                        target.dataset.retried = "true";
+                        target.src = target.src.includes("localhost")
+                          ? "http://127.0.0.1:8000/analytics/plots/efficiency.png"
+                          : "http://localhost:8000/analytics/plots/efficiency.png";
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -297,15 +314,25 @@ export function DnaAnalysisView() {
                     Pearson correlation coefficients computed across scoring, playmaking, rebounding, defensive impact, and shooting efficiency dimensions across 50 NBA legends.
                   </p>
                 </div>
-                <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center">
+                <div className="border border-border-strong overflow-hidden bg-white shadow-inner flex items-center justify-center min-h-[260px]">
                   <img
-                    src="http://127.0.0.1:8000/analytics/plots/correlation.png"
+                    src={`${getApiHost()}/analytics/plots/correlation.png`}
                     alt="Feature Correlation Matrix"
                     className="w-full h-auto object-contain block"
-                    loading="lazy"
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.dataset.retried) {
+                        target.dataset.retried = "true";
+                        target.src = target.src.includes("localhost")
+                          ? "http://127.0.0.1:8000/analytics/plots/correlation.png"
+                          : "http://localhost:8000/analytics/plots/correlation.png";
+                      }
+                    }}
                   />
                 </div>
               </div>
+
             </div>
           </div>
         </>
