@@ -4,3 +4,4 @@ matplotlib
 nba_api
 fastapi
 uvicorn
+scikit-learn

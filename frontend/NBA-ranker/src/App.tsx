@@ -8,6 +8,7 @@ import { ArchiveSearch } from "./components/ArchiveSearch";
 import { EditorialFooter } from "./components/EditorialFooter";
 import { ShotChartView } from "./components/ShotChartView";
 import { DnaAnalysisView } from "./components/DnaAnalysisView";
+import { API_BASE_URL } from "./config";
 
 const DEFAULT_NAMES = [
   "LeBron James",
@@ -48,7 +49,7 @@ export default function App() {
       setError(null);
       try {
         const encodedPlayers = encodeURIComponent(currentPlayers.join(","));
-        const url = `http://127.0.0.1:8000/ranking?players=${encodedPlayers}&w_ppg=${currentWeights.w_ppg}&w_apg=${currentWeights.w_apg}&w_rpg=${currentWeights.w_rpg}&w_def=${currentWeights.w_def}`;
+        const url = `${API_BASE_URL}/ranking?players=${encodedPlayers}&w_ppg=${currentWeights.w_ppg}&w_apg=${currentWeights.w_apg}&w_rpg=${currentWeights.w_rpg}&w_def=${currentWeights.w_def}`;
         const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`Telegraph server returned error code ${res.status}`);
@@ -121,7 +122,7 @@ export default function App() {
     setHasSearched(true);
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/players/search?q=${encodeURIComponent(
+        `${API_BASE_URL}/players/search?q=${encodeURIComponent(
           searchQuery.trim()
         )}&limit=10`
       );

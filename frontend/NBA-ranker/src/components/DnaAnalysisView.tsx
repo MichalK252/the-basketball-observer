@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { DnaResponse, SearchPlayer } from "../types";
 import { DnaRadarChart } from "./DnaRadarChart";
 import { PcaScatterPlot } from "./PcaScatterPlot";
+import { API_BASE_URL } from "../config";
 
 const FEATURED_PLAYERS = [
   { id: 203999, name: "Nikola Jokić" },
@@ -31,10 +32,7 @@ const ARCHETYPE_DESCRIPTIONS: Record<string, string> = {
 };
 
 const getApiHost = () => {
-  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-    return "http://localhost:8000";
-  }
-  return "http://127.0.0.1:8000";
+  return API_BASE_URL;
 };
 
 
@@ -57,7 +55,7 @@ export function DnaAnalysisView() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`http://127.0.0.1:8000/analytics/dna/${selectedPlayerId}`);
+        const res = await fetch(`${API_BASE_URL}/analytics/dna/${selectedPlayerId}`);
         if (!res.ok) {
           throw new Error(`Dispatch server error ${res.status}`);
         }
@@ -95,7 +93,7 @@ export function DnaAnalysisView() {
     setSearching(true);
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/players/search?q=${encodeURIComponent(
+        `${API_BASE_URL}/players/search?q=${encodeURIComponent(
           searchQuery.trim()
         )}&limit=6`
       );
@@ -297,9 +295,11 @@ export function DnaAnalysisView() {
                       const target = e.currentTarget;
                       if (!target.dataset.retried) {
                         target.dataset.retried = "true";
-                        target.src = target.src.includes("localhost")
-                          ? `http://127.0.0.1:8000/analytics/plots/efficiency.png?player_id=${selectedPlayerId}`
-                          : `http://localhost:8000/analytics/plots/efficiency.png?player_id=${selectedPlayerId}`;
+                        if (getApiHost().includes("localhost")) {
+                          target.src = `http://127.0.0.1:8000/analytics/plots/efficiency.png?player_id=${selectedPlayerId}`;
+                        } else if (getApiHost().includes("127.0.0.1")) {
+                          target.src = `http://localhost:8000/analytics/plots/efficiency.png?player_id=${selectedPlayerId}`;
+                        }
                       }
                     }}
                   />
@@ -326,9 +326,11 @@ export function DnaAnalysisView() {
                       const target = e.currentTarget;
                       if (!target.dataset.retried) {
                         target.dataset.retried = "true";
-                        target.src = target.src.includes("localhost")
-                          ? `http://127.0.0.1:8000/analytics/plots/trajectory.png?player_id=${selectedPlayerId}`
-                          : `http://localhost:8000/analytics/plots/trajectory.png?player_id=${selectedPlayerId}`;
+                        if (getApiHost().includes("localhost")) {
+                          target.src = `http://127.0.0.1:8000/analytics/plots/trajectory.png?player_id=${selectedPlayerId}`;
+                        } else if (getApiHost().includes("127.0.0.1")) {
+                          target.src = `http://localhost:8000/analytics/plots/trajectory.png?player_id=${selectedPlayerId}`;
+                        }
                       }
                     }}
                   />

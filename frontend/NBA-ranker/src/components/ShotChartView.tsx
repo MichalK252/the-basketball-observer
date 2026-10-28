@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Shot, SearchPlayer } from "../types";
 import { CourtChart } from "./CourtChart";
+import { API_BASE_URL } from "../config";
 
 export function ShotChartView() {
   const [query, setQuery] = useState("Stephen Curry");
@@ -24,7 +25,7 @@ export function ShotChartView() {
 
     try {
       const res = await fetch(
-        `http://127.0.0.1:8000/players/search?q=${encodeURIComponent(query.trim())}&limit=6`
+        `${API_BASE_URL}/players/search?q=${encodeURIComponent(query.trim())}&limit=6`
       );
       if (res.ok) {
         const data = await res.json();
@@ -42,7 +43,7 @@ export function ShotChartView() {
       setLoadingSeasons(true);
       setError(null);
       try {
-        const res = await fetch(`http://127.0.0.1:8000/players/${selectedPlayer.id}/seasons`);
+        const res = await fetch(`${API_BASE_URL}/players/${selectedPlayer.id}/seasons`);
         if (!res.ok) throw new Error("Failed to load seasons");
         const data: string[] = await res.json();
         setSeasons(data);
@@ -68,7 +69,7 @@ export function ShotChartView() {
       setError(null);
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/players/${selectedPlayer.id}/shots?season=${selectedSeason}`
+          `${API_BASE_URL}/players/${selectedPlayer.id}/shots?season=${selectedSeason}`
         );
         if (!res.ok) throw new Error("Failed to load shot coordinates");
         const data: Shot[] = await res.json();
