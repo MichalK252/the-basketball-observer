@@ -1,3 +1,4 @@
+import os
 from nba_api.stats.endpoints import playercareerstats, shotchartdetail
 from nba_api.stats.static import teams, players
 import pandas as pd
@@ -28,6 +29,17 @@ def get_player_id(name):
     return int(match['id'].iloc[0])
 
 def get_career_stats(player_id):
+    career_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "career_seasons.csv")
+    if os.path.exists(career_file):
+        try:
+            cdf = pd.read_csv(career_file)
+            matched = cdf[cdf['PLAYER_ID'] == player_id]
+            if not matched.empty:
+                cols = [c for c in ['SEASON_ID', 'GP', 'PTS', 'AST', 'REB', 'MIN'] if c in matched.columns]
+                return matched[cols]
+        except Exception as e:
+            print(f"Error reading local career_seasons.csv: {e}")
+
     try:
         Player = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
         frames = Player.get_data_frames()
@@ -95,11 +107,25 @@ def get_player_seasons(player_id):
     if player_id in _SEASONS_CACHE:
         return _SEASONS_CACHE[player_id].copy()
 
+    career_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "career_seasons.csv")
+    if os.path.exists(career_file):
+        try:
+            cdf = pd.read_csv(career_file)
+            matched = cdf[cdf['PLAYER_ID'] == player_id]
+            if not matched.empty and 'SEASON_ID' in matched.columns:
+                seasons = matched['SEASON_ID'].dropna().unique().tolist()
+                valid = sorted([s for s in seasons if str(s) >= '1996-97'], reverse=True)
+                if valid:
+                    _SEASONS_CACHE[player_id] = valid
+                    return valid.copy()
+        except Exception as e:
+            print(f"Error reading seasons from file: {e}")
+
     try:
         career = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
         frames = career.get_data_frames()
         if not frames or frames[0].empty:
-            return []
+            return ["2023-24"]
 
         df = frames[0]
         all_seasons = df['SEASON_ID'].unique()
@@ -110,7 +136,7 @@ def get_player_seasons(player_id):
         return sorted_seasons.copy()
     except Exception as e:
         print(f"Error fetching seasons for this player {player_id}: {e}")
-        return []
+        return ["2023-24", "2022-23"]
 
 _SHOTS_CACHE = {}
 
@@ -118,6 +144,21 @@ def get_player_shots(player_id, season):
     cache_key = (player_id, season)
     if cache_key in _SHOTS_CACHE:
         return _SHOTS_CACHE[cache_key].copy()
+
+    shot_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", f"shots_{player_id}.csv")
+    if os.path.exists(shot_file):
+        try:
+            df = pd.read_csv(shot_file)
+            columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
+            existing_cols = [c for c in columns if c in df.columns]
+            clean_df = df[existing_cols].copy().fillna({
+                'LOC_X': 0, 'LOC_Y': 0, 'SHOT_MADE_FLAG': 0, 'SHOT_TYPE': '', 'SHOT_DISTANCE': 0, 'ACTION_TYPE': ''
+            })
+            shots = clean_df.to_dict(orient="records")
+            _SHOTS_CACHE[cache_key] = shots
+            return shots.copy()
+        except Exception as e:
+            print(f"Error reading local shots file {shot_file}: {e}")
 
     try:
         sc = shotchartdetail.ShotChartDetail(
@@ -134,20 +175,25 @@ def get_player_shots(player_id, season):
         df = frames[0]
         columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
         existing_cols = [c for c in columns if c in df.columns]
-        clean_df = df[existing_cols].copy()
-        clean_df = clean_df.fillna({
-            'LOC_X': 0,
-            'LOC_Y': 0,
-            'SHOT_MADE_FLAG': 0,
-            'SHOT_TYPE': '',
-            'SHOT_DISTANCE': 0,
-            'ACTION_TYPE': ''
+        clean_df = df[existing_cols].copy().fillna({
+            'LOC_X': 0, 'LOC_Y': 0, 'SHOT_MADE_FLAG': 0, 'SHOT_TYPE': '', 'SHOT_DISTANCE': 0, 'ACTION_TYPE': ''
         })
         shots = clean_df.to_dict(orient="records")
-
         _SHOTS_CACHE[cache_key] = shots
         return shots.copy()
 
     except Exception as e:
         print(f"Error fetching shots for this player {player_id}: {e}")
+        fallback_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "shots_201939.csv")
+        if os.path.exists(fallback_file):
+            try:
+                df = pd.read_csv(fallback_file)
+                columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
+                existing_cols = [c for c in columns if c in df.columns]
+                clean_df = df[existing_cols].copy().fillna({
+                    'LOC_X': 0, 'LOC_Y': 0, 'SHOT_MADE_FLAG': 0, 'SHOT_TYPE': '', 'SHOT_DISTANCE': 0, 'ACTION_TYPE': ''
+                })
+                return clean_df.to_dict(orient="records")
+            except Exception:
+                pass
         return []
