@@ -37,6 +37,7 @@ def build_ranking(
 ):
     target = player_names if player_names and len(player_names) > 0 else DEFAULT_PLAYERS
     results = []
+    dna_df = load_dna_database()
 
     for item in target:
         if not item:
@@ -53,6 +54,26 @@ def build_ranking(
 
         if player_id is None:
             continue
+
+        if not dna_df.empty:
+            dna_match = dna_df[dna_df['id'] == player_id]
+            if dna_match.empty and player_name:
+                dna_match = dna_df[dna_df['Player'].str.lower() == player_name.lower()]
+            if not dna_match.empty:
+                row = dna_match.iloc[0]
+                results.append({
+                    "id": int(row["id"]),
+                    "Player": str(row["Player"]),
+                    "PTS": int(row["PTS"]),
+                    "AST": int(row["AST"]),
+                    "REB": int(row["REB"]),
+                    "GP": int(row["GP"]),
+                    "STL": int(row["STL"]) if "STL" in row else 0,
+                    "BLK": int(row["BLK"]) if "BLK" in row else 0,
+                    "FGM": int(row["FGM"]) if "FGM" in row else 0,
+                    "FGA": int(row["FGA"]) if "FGA" in row else 0,
+                })
+                continue
 
         df = get_career_totals(player_id)
         if df.empty or df["GP"].iloc[0] == 0:

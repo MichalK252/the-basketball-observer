@@ -28,11 +28,17 @@ def get_player_id(name):
     return int(match['id'].iloc[0])
 
 def get_career_stats(player_id):
-
-    Player = playercareerstats.PlayerCareerStats(player_id=player_id)
-    df = Player.get_data_frames()[0]
-
-    return df[['SEASON_ID', 'GP', 'PTS', 'AST', 'REB', 'MIN']]
+    try:
+        Player = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
+        frames = Player.get_data_frames()
+        if not frames or frames[0].empty:
+            return pd.DataFrame()
+        df = frames[0]
+        cols = [c for c in ['SEASON_ID', 'GP', 'PTS', 'AST', 'REB', 'MIN'] if c in df.columns]
+        return df[cols]
+    except Exception as e:
+        print(f"Error fetching career stats for {player_id}: {e}")
+        return pd.DataFrame()
 
 _CAREER_CACHE = {}
 
@@ -41,7 +47,7 @@ def get_career_totals(player_id):
         return _CAREER_CACHE[player_id].copy()
 
     try:
-        Player = playercareerstats.PlayerCareerStats(player_id=player_id)
+        Player = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
         frames = Player.get_data_frames()
         if not frames or frames[0].empty:
             return pd.DataFrame()
@@ -90,7 +96,7 @@ def get_player_seasons(player_id):
         return _SEASONS_CACHE[player_id].copy()
 
     try:
-        career = playercareerstats.PlayerCareerStats(player_id=player_id)
+        career = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
         frames = career.get_data_frames()
         if not frames or frames[0].empty:
             return []
@@ -118,7 +124,8 @@ def get_player_shots(player_id, season):
             team_id=0,
             player_id=player_id,
             season_nullable=season,
-            context_measure_simple='FGA'  # FGA = Field Goal Attempts (wszystkie próby)
+            context_measure_simple='FGA',
+            timeout=10
         )
         frames = sc.get_data_frames()
         if not frames or frames[0].empty:
