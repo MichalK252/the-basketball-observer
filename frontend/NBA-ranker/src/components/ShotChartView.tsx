@@ -3,6 +3,17 @@ import type { Shot, SearchPlayer } from "../types";
 import { CourtChart } from "./CourtChart";
 import { API_BASE_URL } from "../config";
 
+const FEATURED_PLAYERS = [
+  { id: 201939, name: "Stephen Curry", season: "2023-24" },
+  { id: 203999, name: "Nikola Jokić", season: "2023-24" },
+  { id: 2544, name: "LeBron James", season: "2023-24" },
+  { id: 1629029, name: "Luka Dončić", season: "2023-24" },
+  { id: 203507, name: "Giannis Antetokounmpo", season: "2023-24" },
+  { id: 893, name: "Michael Jordan", season: "1997-98" },
+  { id: 977, name: "Kobe Bryant", season: "2005-06" },
+  { id: 406, name: "Shaquille O'Neal", season: "1999-00" },
+];
+
 export function ShotChartView() {
   const [query, setQuery] = useState("Stephen Curry");
   const [searchResults, setSearchResults] = useState<SearchPlayer[]>([]);
@@ -118,6 +129,34 @@ export function ShotChartView() {
         <p className="text-xs text-ink-secondary mb-4 font-serif">
           Inquire player records to render spatial coordinate dispersion patterns plotted upon the hardwood court surface.
         </p>
+
+        <div className="flex flex-wrap items-center gap-1.5 mb-4">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted mr-1">
+            Archival Dossiers:
+          </span>
+          {FEATURED_PLAYERS.map((p) => {
+            const isSelected = selectedPlayer.id === p.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  setSelectedPlayer({ id: p.id, full_name: p.name, is_active: true });
+                  setQuery(p.name);
+                  setSelectedSeason(p.season);
+                  setSearchResults([]);
+                }}
+                className={`font-serif text-xs px-2.5 py-1 border transition-colors cursor-pointer ${
+                  isSelected
+                    ? "bg-ink text-paper border-ink font-bold"
+                    : "bg-paper text-ink border-border-strong hover:bg-paper-dark"
+                }`}
+              >
+                {p.name}
+              </button>
+            );
+          })}
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_200px] gap-4 mb-3">
           <div className="relative">

@@ -184,8 +184,21 @@ async def player_dna(player_id: int):
 
     return data
 
+_PLOT_CACHE = {}
+
 @app.get("/analytics/plots/efficiency.png")
 def plot_efficiency(player_id: int | None = None):
+    cache_key = f"eff_{player_id}"
+    if cache_key in _PLOT_CACHE:
+        return Response(
+            content=_PLOT_CACHE[cache_key],
+            media_type="image/png",
+            headers={
+                "Cache-Control": "public, max-age=3600",
+                "Access-Control-Allow-Origin": "*",
+            },
+        )
+
     df = load_dna_database()
     if df.empty:
         df = build_ranking()
@@ -212,25 +225,38 @@ def plot_efficiency(player_id: int | None = None):
             df = pd.concat([df, new_df], ignore_index=True)
 
     image_bytes = generate_efficiency_plot(df, target_player_id=player_id)
+    _PLOT_CACHE[cache_key] = image_bytes
     return Response(
         content=image_bytes,
         media_type="image/png",
         headers={
-            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Cache-Control": "public, max-age=3600",
             "Access-Control-Allow-Origin": "*",
         },
     )
 
 @app.get("/analytics/plots/trajectory.png")
 def plot_trajectory(player_id: int = 203999):
+    cache_key = f"traj_{player_id}"
+    if cache_key in _PLOT_CACHE:
+        return Response(
+            content=_PLOT_CACHE[cache_key],
+            media_type="image/png",
+            headers={
+                "Cache-Control": "public, max-age=3600",
+                "Access-Control-Allow-Origin": "*",
+            },
+        )
+
     match = players_df[players_df['id'] == player_id]
     player_name = match['full_name'].iloc[0] if not match.empty else f"Player #{player_id}"
     image_bytes = generate_trajectory_plot(player_id, player_name=player_name)
+    _PLOT_CACHE[cache_key] = image_bytes
     return Response(
         content=image_bytes,
         media_type="image/png",
         headers={
-            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Cache-Control": "public, max-age=3600",
             "Access-Control-Allow-Origin": "*",
         },
     )

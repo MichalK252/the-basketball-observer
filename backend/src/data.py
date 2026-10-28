@@ -8,13 +8,14 @@ from nba_api.stats.endpoints.playercareerstats import PlayerCareerStats
 nba_players = players.get_players()
 
 players_df = pd.DataFrame(nba_players)
-
 import unicodedata
 
 def normalize_text(text: str) -> str:
     if not text:
         return ""
     return ''.join(c for c in unicodedata.normalize('NFD', str(text)) if unicodedata.category(c) != 'Mn').lower()
+
+players_df['normalized_name'] = players_df['full_name'].apply(normalize_text)
 
 def get_player_id(name):
     target = normalize_text(name)
@@ -58,8 +59,53 @@ def get_career_totals(player_id):
     if player_id in _CAREER_CACHE:
         return _CAREER_CACHE[player_id].copy()
 
+    # 1. Check dna_database.csv
+    dna_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "dna_database.csv")
+    if os.path.exists(dna_file):
+        try:
+            dna_df = pd.read_csv(dna_file)
+            m = dna_df[dna_df['id'] == player_id]
+            if not m.empty:
+                r = m.iloc[0]
+                res = pd.DataFrame([{
+                    "GP": int(r.get("GP", 0)),
+                    "PTS": int(r.get("PTS", 0)),
+                    "AST": int(r.get("AST", 0)),
+                    "REB": int(r.get("REB", 0)),
+                    "STL": int(r.get("STL", 0)),
+                    "BLK": int(r.get("BLK", 0)),
+                    "FGM": int(r.get("FGM", 0)),
+                    "FGA": int(r.get("FGA", 0)),
+                }])
+                _CAREER_CACHE[player_id] = res
+                return res.copy()
+        except Exception as e:
+            pass
+
+    # 2. Check career_seasons.csv
+    career_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "career_seasons.csv")
+    if os.path.exists(career_file):
+        try:
+            cdf = pd.read_csv(career_file)
+            m = cdf[cdf['PLAYER_ID'] == player_id]
+            if not m.empty:
+                res = pd.DataFrame([{
+                    "GP": int(m["GP"].sum()) if "GP" in m else 0,
+                    "PTS": int(m["PTS"].sum()) if "PTS" in m else 0,
+                    "AST": int(m["AST"].sum()) if "AST" in m else 0,
+                    "REB": int(m["REB"].sum()) if "REB" in m else 0,
+                    "STL": int(m["STL"].sum()) if "STL" in m else 0,
+                    "BLK": int(m["BLK"].sum()) if "BLK" in m else 0,
+                    "FGM": int(m["FGM"].sum()) if "FGM" in m else 0,
+                    "FGA": int(m["FGA"].sum()) if "FGA" in m else 0,
+                }])
+                _CAREER_CACHE[player_id] = res
+                return res.copy()
+        except Exception as e:
+            pass
+
     try:
-        Player = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
+        Player = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=4)
         frames = Player.get_data_frames()
         if not frames or frames[0].empty:
             return pd.DataFrame()
@@ -89,9 +135,10 @@ def search_players(query: str, limit: int = 10):
         return []
 
     target = normalize_text(query.strip())
-    matches = players_df[
-        players_df['full_name'].apply(lambda x: target in normalize_text(x))
-    ].copy()
+    if 'normalized_name' in players_df.columns:
+        matches = players_df[players_df['normalized_name'].str.contains(target, na=False)].copy()
+    else:
+        matches = players_df[players_df['full_name'].apply(lambda x: target in normalize_text(x))].copy()
 
     if matches.empty:
         return []
