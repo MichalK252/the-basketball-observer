@@ -55,6 +55,15 @@ def get_career_stats(player_id):
 
 _CAREER_CACHE = {}
 
+def load_active_database():
+    active_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "active_players_totals.csv")
+    if os.path.exists(active_file):
+        try:
+            return pd.read_csv(active_file)
+        except Exception as e:
+            print(f"Error loading active_players_totals.csv: {e}")
+    return pd.DataFrame()
+
 def get_career_totals(player_id):
     if player_id in _CAREER_CACHE:
         return _CAREER_CACHE[player_id].copy()
@@ -103,6 +112,25 @@ def get_career_totals(player_id):
                 return res.copy()
         except Exception as e:
             pass
+
+    # 3. Check active_players_totals.csv
+    active_df = load_active_database()
+    if not active_df.empty:
+        m = active_df[active_df['id'] == player_id]
+        if not m.empty:
+            r = m.iloc[0]
+            res = pd.DataFrame([{
+                "GP": int(r.get("GP", 0)),
+                "PTS": int(r.get("PTS", 0)),
+                "AST": int(r.get("AST", 0)),
+                "REB": int(r.get("REB", 0)),
+                "STL": int(r.get("STL", 0)),
+                "BLK": int(r.get("BLK", 0)),
+                "FGM": int(r.get("FGM", 0)),
+                "FGA": int(r.get("FGA", 0)),
+            }])
+            _CAREER_CACHE[player_id] = res
+            return res.copy()
 
     try:
         Player = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=4)

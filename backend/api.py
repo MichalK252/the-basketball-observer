@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 import pandas as pd
 
-from src.data import get_player_id, get_career_totals, search_players, players_df, get_player_seasons, get_player_shots
+from src.data import get_player_id, get_career_totals, search_players, players_df, get_player_seasons, get_player_shots, load_active_database
 from src.metrics import add_per_game_stats, add_all_around_score
 from fastapi.middleware.cors import CORSMiddleware
 from src.dna import get_dna_analysis, load_dna_database
@@ -38,6 +38,7 @@ def build_ranking(
     target = player_names if player_names and len(player_names) > 0 else DEFAULT_PLAYERS
     results = []
     dna_df = load_dna_database()
+    active_df = load_active_database()
 
     for item in target:
         if not item:
@@ -55,6 +56,7 @@ def build_ranking(
         if player_id is None:
             continue
 
+        # 1. Check 50 historical legends database
         if not dna_df.empty:
             dna_match = dna_df[dna_df['id'] == player_id]
             if dna_match.empty and player_name:
@@ -75,8 +77,36 @@ def build_ranking(
                 })
                 continue
 
+        # 2. Check 572 active NBA players database
+        if not active_df.empty:
+            active_match = active_df[active_df['id'] == player_id]
+            if active_match.empty and player_name:
+                active_match = active_df[active_df['Player'].str.lower() == player_name.lower()]
+            if not active_match.empty:
+                row = active_match.iloc[0]
+                results.append({
+                    "id": int(row["id"]),
+                    "Player": str(row["Player"]),
+                    "PTS": int(row["PTS"]),
+                    "AST": int(row["AST"]),
+                    "REB": int(row["REB"]),
+                    "GP": int(row["GP"]),
+                    "STL": int(row.get("STL", 0)),
+                    "BLK": int(row.get("BLK", 0)),
+                    "FGM": int(row.get("FGM", 0)),
+                    "FGA": int(row.get("FGA", 0)),
+                })
+                continue
+
+        # 3. Fallback to get_career_totals (checks career_seasons.csv then network)
         df = get_career_totals(player_id)
         if df.empty or df["GP"].iloc[0] == 0:
+            results.append({
+                "id": player_id,
+                "Player": player_name,
+                "PTS": 0, "AST": 0, "REB": 0, "GP": 1,
+                "STL": 0, "BLK": 0, "FGM": 0, "FGA": 0,
+            })
             continue
 
         results.append({
