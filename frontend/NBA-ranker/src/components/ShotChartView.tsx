@@ -157,13 +157,21 @@ export function ShotChartView() {
             Hardwood Shot Dispersion Archive
           </h2>
           <span className="font-mono text-[10px] text-accent font-bold tracking-widest uppercase">
-            [Spatial Optical Data 1996—Pres.]
+            [League-Wide 2023—24 Archive & Historic Prime Eras]
           </span>
         </div>
 
-        <p className="text-xs text-ink-secondary mb-4 font-serif">
+        <p className="text-xs text-ink-secondary mb-3 font-serif">
           Inquire player records to render spatial coordinate dispersion patterns plotted upon the hardwood court surface.
         </p>
+
+        <div className="bg-paper border border-border-strong p-3 mb-4 font-serif text-xs text-ink-secondary leading-relaxed shadow-inner">
+          <div className="font-mono text-[10px] uppercase font-bold text-ink tracking-wider mb-1 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent inline-block"></span>
+            Archival Coverage Scope:
+          </div>
+          Complete spatial tracking coordinates (over 235,000 charted field goal attempts) are indexed for the canonical <strong className="text-ink">2023–24 Season</strong> across all 30 NBA franchises and 570+ active roster players. Historic icons also include their respective championship & MVP campaigns (e.g. Jordan '98, Kobe '06, Shaq '00, Curry '16, LeBron '13, Wembanyama '24).
+        </div>
 
         <div className="flex flex-wrap items-center gap-1.5 mb-4">
           <span className="font-mono text-[10px] uppercase tracking-wider text-ink-muted mr-1">

@@ -183,8 +183,8 @@ def get_player_seasons(player_id):
     if player_id in _SEASONS_CACHE:
         return _SEASONS_CACHE[player_id].copy()
 
+    # 1. Return all seasons actually charted in shots.db first
     db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "shots.db")
-    db_seasons = []
     if os.path.exists(db_path):
         try:
             conn = sqlite3.connect(db_path)
@@ -192,9 +192,13 @@ def get_player_seasons(player_id):
             c.execute("SELECT DISTINCT season FROM shots WHERE player_id = ? ORDER BY season DESC", (player_id,))
             db_seasons = [r[0] for r in c.fetchall()]
             conn.close()
+            if db_seasons:
+                _SEASONS_CACHE[player_id] = db_seasons
+                return db_seasons.copy()
         except Exception as e:
             print(f"Error querying seasons from shots.db: {e}")
 
+    # 2. If player is not in shots.db, look in career_seasons.csv
     career_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "career_seasons.csv")
     if os.path.exists(career_file):
         try:
@@ -202,17 +206,14 @@ def get_player_seasons(player_id):
             matched = cdf[cdf['PLAYER_ID'] == player_id]
             if not matched.empty and 'SEASON_ID' in matched.columns:
                 file_seasons = matched['SEASON_ID'].dropna().unique().tolist()
-                valid = sorted(list(set(db_seasons + [s for s in file_seasons if str(s) >= '1996-97'])), reverse=True)
+                valid = sorted([s for s in file_seasons if str(s) >= '1996-97'], reverse=True)
                 if valid:
                     _SEASONS_CACHE[player_id] = valid
                     return valid.copy()
         except Exception as e:
             print(f"Error reading seasons from file: {e}")
 
-    if db_seasons:
-        _SEASONS_CACHE[player_id] = db_seasons
-        return db_seasons.copy()
-
+    # 3. Fallback to NBA API
     try:
         career = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
         frames = career.get_data_frames()
@@ -228,7 +229,7 @@ def get_player_seasons(player_id):
         return sorted_seasons.copy()
     except Exception as e:
         print(f"Error fetching seasons for this player {player_id}: {e}")
-        return ["2023-24", "2022-23"]
+        return ["2023-24"]
 
 _SHOTS_CACHE = {}
 

@@ -69,6 +69,7 @@ Users can adjust the four weight sliders in real time or select preset archetype
 
 Visualizes individual field goal attempts across specific seasons using official NBA coordinates.
 
+- **Coverage Scope:** Indexed SQLite database (`backend/data/shots.db`) storing over 235,000 charted field goal attempts covering the complete **2023–24 Season** across all 30 NBA franchises and 570+ active roster players. Historical superstars also feature their iconic championship and MVP campaigns (e.g. Michael Jordan 1997–98, Kobe Bryant 2005–06, Shaquille O'Neal 1999–00, Stephen Curry 2015–16, LeBron James 2012–13, Victor Wembanyama 2023–24 to 2026–27).
 - **Coordinate System:** NBA API records shot coordinates in tenths of a foot, with $(0, 0)$ positioned at the center of the basket hoop (`LOC_X` spans from $-250$ to $+250$, `LOC_Y` spans from $-47.5$ behind the backboard to $+422.5$ at the half-court line).
 - **SVG Projection:** The frontend renders an authentic half-court with a `viewBox="-250 -48 500 470"`, including three-point arcs, restricted area, free-throw lane, and key markings.
 - **Interactive Inspection:** Hovering over any shot displays action type, distance in feet, shot value (2PT / 3PT), and result.
