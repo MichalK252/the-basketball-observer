@@ -1,3 +1,4 @@
+import sqlite3
 import os
 from nba_api.stats.endpoints import playercareerstats, shotchartdetail
 from nba_api.stats.static import teams, players
@@ -182,19 +183,35 @@ def get_player_seasons(player_id):
     if player_id in _SEASONS_CACHE:
         return _SEASONS_CACHE[player_id].copy()
 
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "shots.db")
+    db_seasons = []
+    if os.path.exists(db_path):
+        try:
+            conn = sqlite3.connect(db_path)
+            c = conn.cursor()
+            c.execute("SELECT DISTINCT season FROM shots WHERE player_id = ? ORDER BY season DESC", (player_id,))
+            db_seasons = [r[0] for r in c.fetchall()]
+            conn.close()
+        except Exception as e:
+            print(f"Error querying seasons from shots.db: {e}")
+
     career_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "career_seasons.csv")
     if os.path.exists(career_file):
         try:
             cdf = pd.read_csv(career_file)
             matched = cdf[cdf['PLAYER_ID'] == player_id]
             if not matched.empty and 'SEASON_ID' in matched.columns:
-                seasons = matched['SEASON_ID'].dropna().unique().tolist()
-                valid = sorted([s for s in seasons if str(s) >= '1996-97'], reverse=True)
+                file_seasons = matched['SEASON_ID'].dropna().unique().tolist()
+                valid = sorted(list(set(db_seasons + [s for s in file_seasons if str(s) >= '1996-97'])), reverse=True)
                 if valid:
                     _SEASONS_CACHE[player_id] = valid
                     return valid.copy()
         except Exception as e:
             print(f"Error reading seasons from file: {e}")
+
+    if db_seasons:
+        _SEASONS_CACHE[player_id] = db_seasons
+        return db_seasons.copy()
 
     try:
         career = playercareerstats.PlayerCareerStats(player_id=player_id, timeout=10)
@@ -221,8 +238,43 @@ def get_player_shots(player_id, season):
         return _SHOTS_CACHE[cache_key].copy()
 
     data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+    db_path = os.path.join(data_dir, "shots.db")
 
-    # 1. Check season-specific file first: shots_{player_id}_{season}.csv
+    # 1. Query SQLite indexed database (covers all 571 NBA players and multiple seasons)
+    if os.path.exists(db_path):
+        try:
+            conn = sqlite3.connect(db_path)
+            c = conn.cursor()
+            if season:
+                c.execute(
+                    "SELECT loc_x, loc_y, shot_made_flag, shot_type, shot_distance, action_type FROM shots WHERE player_id = ? AND season = ?",
+                    (player_id, season)
+                )
+            else:
+                c.execute(
+                    "SELECT loc_x, loc_y, shot_made_flag, shot_type, shot_distance, action_type FROM shots WHERE player_id = ? ORDER BY season DESC",
+                    (player_id,)
+                )
+            rows = c.fetchall()
+            conn.close()
+            if rows:
+                shots = [
+                    {
+                        "LOC_X": r[0],
+                        "LOC_Y": r[1],
+                        "SHOT_MADE_FLAG": r[2],
+                        "SHOT_TYPE": r[3],
+                        "SHOT_DISTANCE": r[4],
+                        "ACTION_TYPE": r[5]
+                    }
+                    for r in rows
+                ]
+                _SHOTS_CACHE[cache_key] = shots
+                return shots.copy()
+        except Exception as e:
+            print(f"Error querying shots.db for player {player_id}: {e}")
+
+    # 2. Check season-specific file: shots_{player_id}_{season}.csv
     specific_file = os.path.join(data_dir, f"shots_{player_id}_{season}.csv")
     if os.path.exists(specific_file):
         try:
@@ -238,27 +290,7 @@ def get_player_shots(player_id, season):
         except Exception as e:
             print(f"Error reading season shots file {specific_file}: {e}")
 
-    # 2. Check general file: shots_{player_id}.csv (filter by SEASON if column exists)
-    general_file = os.path.join(data_dir, f"shots_{player_id}.csv")
-    if os.path.exists(general_file):
-        try:
-            df = pd.read_csv(general_file)
-            if 'SEASON' in df.columns and season:
-                season_df = df[df['SEASON'] == season]
-                if not season_df.empty:
-                    df = season_df
-            columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
-            existing_cols = [c for c in columns if c in df.columns]
-            clean_df = df[existing_cols].copy().fillna({
-                'LOC_X': 0, 'LOC_Y': 0, 'SHOT_MADE_FLAG': 0, 'SHOT_TYPE': '', 'SHOT_DISTANCE': 0, 'ACTION_TYPE': ''
-            })
-            shots = clean_df.to_dict(orient="records")
-            _SHOTS_CACHE[cache_key] = shots
-            return shots.copy()
-        except Exception as e:
-            print(f"Error reading local shots file {general_file}: {e}")
-
-    # 3. Live fetch from stats.nba.com
+    # 3. Live query from stats.nba.com
     try:
         sc = shotchartdetail.ShotChartDetail(
             team_id=0,
