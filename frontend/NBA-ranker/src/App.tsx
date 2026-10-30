@@ -1,13 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import type { PlayerRank, SearchPlayer, Weights } from "./types";
 import { PRESETS } from "./constants/presets";
-import { Masthead } from "./components/Masthead";
+import { Masthead, type TabType } from "./components/Masthead";
 import { IndexCalibration } from "./components/IndexCalibration";
 import { RankingTable } from "./components/RankingTable";
 import { ArchiveSearch } from "./components/ArchiveSearch";
 import { EditorialFooter } from "./components/EditorialFooter";
 import { ShotChartView } from "./components/ShotChartView";
 import { DnaAnalysisView } from "./components/DnaAnalysisView";
+import { FaqView } from "./components/FaqView";
 import { API_BASE_URL } from "./config";
 
 const DEFAULT_NAMES = [
@@ -19,7 +20,7 @@ const DEFAULT_NAMES = [
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"ranking" | "shotchart" | "dna">("ranking");
+  const [activeTab, setActiveTab] = useState<TabType>("ranking");
 
   const [players, setPlayers] = useState<PlayerRank[]>([]);
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>(DEFAULT_NAMES);
@@ -179,7 +180,11 @@ export default function App() {
 
       {activeTab === "dna" && <DnaAnalysisView />}
 
-      <EditorialFooter />
+      {activeTab === "faq" && (
+        <FaqView onBackToRanking={() => setActiveTab("ranking")} />
+      )}
+
+      <EditorialFooter onOpenFaq={() => setActiveTab("faq")} />
     </div>
   );
-}
+}

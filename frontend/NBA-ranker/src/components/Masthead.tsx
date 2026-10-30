@@ -1,6 +1,8 @@
+export type TabType = "ranking" | "shotchart" | "dna" | "faq";
+
 interface MastheadProps {
-  activeTab: "ranking" | "shotchart" | "dna";
-  onTabChange: (tab: "ranking" | "shotchart" | "dna") => void;
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
 }
 
 export function Masthead({ activeTab, onTabChange }: MastheadProps) {
@@ -28,7 +30,7 @@ export function Masthead({ activeTab, onTabChange }: MastheadProps) {
         </p>
       </div>
 
-      <nav className="grid grid-cols-3 border-t-2 border-b-2 border-border-strong font-mono text-xs uppercase tracking-wider divide-x divide-border-strong">
+      <nav className="grid grid-cols-2 md:grid-cols-4 border-t-2 border-b-2 border-border-strong font-mono text-[11px] sm:text-xs uppercase tracking-wider divide-x divide-y md:divide-y-0 divide-border-strong">
         <button
           type="button"
           onClick={() => onTabChange("ranking")}
@@ -62,9 +64,18 @@ export function Masthead({ activeTab, onTabChange }: MastheadProps) {
         >
           Section III: Style DNA
         </button>
+        <button
+          type="button"
+          onClick={() => onTabChange("faq")}
+          className={`py-2.5 px-2 text-center cursor-pointer transition-colors truncate ${
+            activeTab === "faq"
+              ? "bg-ink text-paper font-bold"
+              : "bg-paper text-ink hover:bg-paper-dark"
+          }`}
+        >
+          Section IV: Colophon & FAQ
+        </button>
       </nav>
     </header>
   );
 }
-
-
