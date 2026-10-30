@@ -5,6 +5,7 @@ import { API_BASE_URL } from "../config";
 
 const FEATURED_PLAYERS = [
   { id: 201939, name: "Stephen Curry", season: "2023-24" },
+  { id: 1641705, name: "Victor Wembanyama", season: "2023-24" },
   { id: 203999, name: "Nikola Jokić", season: "2023-24" },
   { id: 2544, name: "LeBron James", season: "2023-24" },
   { id: 1629029, name: "Luka Dončić", season: "2023-24" },
@@ -24,6 +25,7 @@ export function ShotChartView() {
   });
   const [seasons, setSeasons] = useState<string[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string>("2023-24");
+  const [preferredSeason, setPreferredSeason] = useState<string | null>(null);
   const [shots, setShots] = useState<Shot[]>([]);
   const [loadingShots, setLoadingShots] = useState(false);
   const [loadingSeasons, setLoadingSeasons] = useState(false);
@@ -50,6 +52,8 @@ export function ShotChartView() {
   useEffect(() => {
     if (!selectedPlayer) return;
 
+    let isCancelled = false;
+
     const loadSeasons = async () => {
       setLoadingSeasons(true);
       setError(null);
@@ -57,23 +61,42 @@ export function ShotChartView() {
         const res = await fetch(`${API_BASE_URL}/players/${selectedPlayer.id}/seasons`);
         if (!res.ok) throw new Error("Failed to load seasons");
         const data: string[] = await res.json();
-        setSeasons(data);
-        if (data.length > 0) {
-          setSelectedSeason(data[0]);
+        if (!isCancelled) {
+          setSeasons(data);
+          if (data.length > 0) {
+            if (preferredSeason && data.includes(preferredSeason)) {
+              setSelectedSeason(preferredSeason);
+              setPreferredSeason(null);
+            } else if (data.includes("2023-24")) {
+              setSelectedSeason("2023-24");
+            } else {
+              setSelectedSeason(data[0]);
+            }
+          }
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Error";
-        setError(msg);
+        if (!isCancelled) {
+          const msg = err instanceof Error ? err.message : "Error";
+          setError(msg);
+        }
       } finally {
-        setLoadingSeasons(false);
+        if (!isCancelled) {
+          setLoadingSeasons(false);
+        }
       }
     };
 
     loadSeasons();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [selectedPlayer]);
 
   useEffect(() => {
     if (!selectedPlayer || !selectedSeason) return;
+
+    let isCancelled = false;
 
     const loadShots = async () => {
       setLoadingShots(true);
@@ -84,21 +107,33 @@ export function ShotChartView() {
         );
         if (!res.ok) throw new Error("Failed to load shot coordinates");
         const data: Shot[] = await res.json();
-        setShots(data);
+        if (!isCancelled) {
+          setShots(data);
+        }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Error";
-        setError(msg);
+        if (!isCancelled) {
+          const msg = err instanceof Error ? err.message : "Error";
+          setError(msg);
+          setShots([]);
+        }
       } finally {
-        setLoadingShots(false);
+        if (!isCancelled) {
+          setLoadingShots(false);
+        }
       }
     };
 
     loadShots();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [selectedPlayer, selectedSeason]);
 
   const selectPlayer = (p: SearchPlayer) => {
     setSelectedPlayer(p);
     setQuery(p.full_name);
+    setPreferredSeason(null);
     setSearchResults([]);
   };
 
@@ -143,6 +178,7 @@ export function ShotChartView() {
                 onClick={() => {
                   setSelectedPlayer({ id: p.id, full_name: p.name, is_active: true });
                   setQuery(p.name);
+                  setPreferredSeason(p.season);
                   setSelectedSeason(p.season);
                   setSearchResults([]);
                 }}

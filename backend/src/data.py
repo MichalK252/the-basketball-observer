@@ -220,10 +220,13 @@ def get_player_shots(player_id, season):
     if cache_key in _SHOTS_CACHE:
         return _SHOTS_CACHE[cache_key].copy()
 
-    shot_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", f"shots_{player_id}.csv")
-    if os.path.exists(shot_file):
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+
+    # 1. Check season-specific file first: shots_{player_id}_{season}.csv
+    specific_file = os.path.join(data_dir, f"shots_{player_id}_{season}.csv")
+    if os.path.exists(specific_file):
         try:
-            df = pd.read_csv(shot_file)
+            df = pd.read_csv(specific_file)
             columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
             existing_cols = [c for c in columns if c in df.columns]
             clean_df = df[existing_cols].copy().fillna({
@@ -233,15 +236,36 @@ def get_player_shots(player_id, season):
             _SHOTS_CACHE[cache_key] = shots
             return shots.copy()
         except Exception as e:
-            print(f"Error reading local shots file {shot_file}: {e}")
+            print(f"Error reading season shots file {specific_file}: {e}")
 
+    # 2. Check general file: shots_{player_id}.csv (filter by SEASON if column exists)
+    general_file = os.path.join(data_dir, f"shots_{player_id}.csv")
+    if os.path.exists(general_file):
+        try:
+            df = pd.read_csv(general_file)
+            if 'SEASON' in df.columns and season:
+                season_df = df[df['SEASON'] == season]
+                if not season_df.empty:
+                    df = season_df
+            columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
+            existing_cols = [c for c in columns if c in df.columns]
+            clean_df = df[existing_cols].copy().fillna({
+                'LOC_X': 0, 'LOC_Y': 0, 'SHOT_MADE_FLAG': 0, 'SHOT_TYPE': '', 'SHOT_DISTANCE': 0, 'ACTION_TYPE': ''
+            })
+            shots = clean_df.to_dict(orient="records")
+            _SHOTS_CACHE[cache_key] = shots
+            return shots.copy()
+        except Exception as e:
+            print(f"Error reading local shots file {general_file}: {e}")
+
+    # 3. Live fetch from stats.nba.com
     try:
         sc = shotchartdetail.ShotChartDetail(
             team_id=0,
             player_id=player_id,
             season_nullable=season,
             context_measure_simple='FGA',
-            timeout=10
+            timeout=8
         )
         frames = sc.get_data_frames()
         if not frames or frames[0].empty:
@@ -258,17 +282,5 @@ def get_player_shots(player_id, season):
         return shots.copy()
 
     except Exception as e:
-        print(f"Error fetching shots for this player {player_id}: {e}")
-        fallback_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "shots_201939.csv")
-        if os.path.exists(fallback_file):
-            try:
-                df = pd.read_csv(fallback_file)
-                columns = ['LOC_X', 'LOC_Y', 'SHOT_MADE_FLAG', 'SHOT_TYPE', 'SHOT_DISTANCE', 'ACTION_TYPE']
-                existing_cols = [c for c in columns if c in df.columns]
-                clean_df = df[existing_cols].copy().fillna({
-                    'LOC_X': 0, 'LOC_Y': 0, 'SHOT_MADE_FLAG': 0, 'SHOT_TYPE': '', 'SHOT_DISTANCE': 0, 'ACTION_TYPE': ''
-                })
-                return clean_df.to_dict(orient="records")
-            except Exception:
-                pass
+        print(f"Error fetching shots for player {player_id} season {season}: {e}")
         return []
